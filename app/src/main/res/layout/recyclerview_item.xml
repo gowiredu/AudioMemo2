@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    xmlns:app="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:padding="5dp">
+
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_margin="5dp"
+        android:elevation="5dp"
+        android:animateLayoutChanges="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        card_view:cardCornerRadius="4dp"
+        card_view:contentPadding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <RelativeLayout
+            android:animateLayoutChanges="true"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:padding="5dp">
+
+            <TextView
+                android:animateLayoutChanges="true"
+                android:id="@+id/memo_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingTop="5dp"
+                android:text="Large Text"
+                android:textAppearance="@android:style/TextAppearance.Material.Large"
+                android:textSize="18sp" />
+
+
+
+            <TextView
+                android:animateLayoutChanges="true"
+                android:id="@+id/memo_preview"
+                android:layout_width="220dp"
+                android:layout_height="wrap_content"
+                android:paddingBottom="5dp"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:text="Small Text"
+                android:layout_below="@+id/memo_title"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+
+            <FrameLayout
+                android:visibility="gone"
+                android:animateLayoutChanges="true"
+                android:scrollbars="vertical"
+                android:id="@+id/mtf_card"
+                android:clickable="true"
+                android:layout_width="280dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/card"
+                android:layout_marginTop="18dp"
+                android:elevation="2dp"
+                android:layout_below="@+id/memo_preview"
+                android:layout_centerInParent="true"
+                android:layout_height="140dp">
+
+                <TextView
+                    android:visibility="gone"
+                    android:animateLayoutChanges="true"
+                    android:id="@+id/transcription_full"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:scrollbars="vertical"
+                    android:paddingTop="15dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="15dp"
+                    android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+            </FrameLayout>
+
+
+            <!--
+            <ImageButton
+                android:visibility="gone"
+                android:background="@drawable/circle_media_button"
+                android:layout_width="55dp"
+                android:layout_height="50dp"
+                android:drawableLeft="@drawable/ic_stop_icon"
+
+                android:elevation="3dp"/>
+                -->
+
+            <ImageButton
+                android:visibility="gone"
+                android:animateLayoutChanges="true"
+                android:layout_height="80dp"
+                android:layout_width="80dp"
+                android:id="@+id/upload_button"
+                android:src="@drawable/ic_upload_icon_menu"
+                android:layout_gravity="bottom"
+                android:clickable="true"
+                android:background="#00000000"
+                android:contentDescription="@string/upload_button"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <ImageButton
+                android:visibility="gone"
+                android:animateLayoutChanges="true"
+                android:layout_height="80dp"
+                android:layout_width="80dp"
+                android:id="@+id/play_button"
+                android:src="@drawable/ic_play_icon"
+                android:background="#00000000"
+                android:contentDescription="@string/play_button"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/upload_button"
+                android:layout_toStartOf="@+id/upload_button" />
+
+            <ImageButton
+                android:visibility="gone"
+                android:animateLayoutChanges="true"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:id="@+id/rename_button"
+                android:src="@drawable/ic_rename_icon"
+                android:background="#00000000"
+                android:contentDescription="@string/rename_button"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/play_button"
+                android:layout_toStartOf="@+id/play_button" />
+
+            <ImageButton
+                android:visibility="gone"
+                android:animateLayoutChanges="true"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:id="@+id/delete_button"
+                android:src="@drawable/ic_delete_icon"
+                android:background="#00000000"
+                android:contentDescription="@string/play_button"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/rename_button"
+                android:layout_toStartOf="@+id/rename_button" />
+
+            <ImageView
+                android:id="@+id/dropdown_arrow"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_expand_icon"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="13dp"
+                android:layout_marginEnd="13dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/collapse_arrow"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_collapse_icon"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="13dp"
+                android:layout_marginEnd="13dp" />
+
+            <SeekBar
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/memo_seekBar"
+                style="@android:style/Widget.Material.Light.SeekBar"
+                android:layout_alignLeft="@+id/mtf_card"
+                android:layout_alignStart="@+id/mtf_card"
+                android:layout_toStartOf="@+id/dropdown_arrow"
+                android:layout_above="@+id/play_button"
+                android:layout_alignRight="@+id/mtf_card"
+                android:layout_alignEnd="@+id/mtf_card" />
+
+            <!--
+            <android.support.design.widget.FloatingActionButton
+                android:visibility="gone"
+                card_view:fabSize="mini"
+                android:layout_gravity="bottom"
+                android:clickable="true"
+                android:id="@+id/play_button"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/ic_stop_icon"
+                android:elevation="3dp"
+                app:backgroundTint="@color/purple"
+                android:layout_height="60dp"
+                android:layout_width="60dp"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/memo_preview"
+                android:layout_toEndOf="@+id/memo_preview"/>
+
+            <ImageButton
+                android:visibility="gone"
+                android:background="@drawable/circle_media_button"
+                android:layout_width="55dp"
+                android:layout_height="50dp"
+                android:drawableStart="@drawable/ic_play_icon"
+                android:drawableLeft="@drawable/ic_play_icon"
+                android:layout_alignParentBottom="true"
+                android:layout_alignRight="@+id/memo_title"
+                android:layout_alignEnd="@+id/memo_title"
+                android:elevation="3dp"/>
+                -->
+
+
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+</LinearLayout>

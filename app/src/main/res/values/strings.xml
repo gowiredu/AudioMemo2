@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Audio Memo 2</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="play_button">Play Button</string>
+    <string name="stop_button">Stop Button</string>
+    <string name="upload_button">Upload Button</string>
+    <string name="rename_button">Rename Button</string>
+    <string name="delete_button">Delete Button</string>
+    <string name=".mp3">mp3 Extension</string>
+    <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
+</resources>

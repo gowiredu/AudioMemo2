@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <!--
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_device"
+            android:icon="@drawable/ic_device_icon_menu"
+            android:title="Device"
+            android:checkableBehavior="single"/>
+
+        <item
+            android:id="@+id/nav_uploaded"
+            android:icon="@drawable/ic_upload_icon_menu"
+            android:title="Uploaded"
+            android:checkableBehavior="single"/>
+    </group>
+    -->
+
+    <item android:title="Device">
+        <menu>
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:orderInCategory="0"
+                    android:id="@+id/nav_personal"
+                    android:icon="@drawable/ic_device_icon_menu"
+                    android:title="Personal" />
+                <item
+                    android:orderInCategory="0"
+                    android:id="@+id/nav_work"
+                    android:icon="@drawable/ic_work_icon_menu"
+                    android:title="Work" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="Cloud">
+        <menu>
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:orderInCategory="1"
+                    android:id="@+id/nav_uploaded"
+                    android:icon="@drawable/ic_upload_icon_menu"
+                    android:title="Uploaded" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="Other">
+        <menu>
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:id="@+id/nav_add"
+                    android:icon="@drawable/ic_add_category_menu"
+                    android:title="Add a Category" />
+            </group>
+        </menu>
+    </item>
+
+    <!--
+    <item android:title="Other">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Share" />
+        </menu>
+    </item>
+    -->
+
+</menu>

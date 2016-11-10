@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "107764699105",
+    "firebase_url": "https://test-d2649.firebaseio.com",
+    "project_id": "test-d2649",
+    "storage_bucket": "test-d2649.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:107764699105:android:20019ff86f9384c6",
+        "android_client_info": {
+          "package_name": "com.gowiredu.firebaseuploadaudio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "107764699105-b3c2cik5ojlg7md23une1fjobq8g621p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDS8CVN7y54muDzy_N-vQpOUrYSLkPMyLY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:107764699105:android:36ae12f536ef3c5d",
+        "android_client_info": {
+          "package_name": "com.gowiredu.audiomemotest2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "107764699105-b3c2cik5ojlg7md23une1fjobq8g621p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDS8CVN7y54muDzy_N-vQpOUrYSLkPMyLY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
