@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="20dp"
+    android:shape="rectangle" >
+
+    <solid android:color="#FFFFFF" />
+
+    <!-- for border color around textbox -->
+    <stroke
+        android:width="2dp"
+        android:color="#4fa5d5"/>
+
+    <padding
+        android:bottom="@dimen/mtf_corner_radius"
+        android:left="@dimen/mtf_corner_radius"
+        android:right="@dimen/mtf_corner_radius"
+        android:top="@dimen/mtf_corner_radius"/>
+
+    <!-- same size as transcription box (yellow box) -->
+    <size
+        android:height="140dp"
+        android:width="280dp" />
+
+    <corners android:radius="@dimen/mtf_corner_radius"/>
+</shape>

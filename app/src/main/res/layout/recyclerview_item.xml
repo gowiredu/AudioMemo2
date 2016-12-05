@@ -28,6 +28,7 @@
             android:layout_height="fill_parent"
             android:padding="5dp">
 
+
             <TextView
                 android:animateLayoutChanges="true"
                 android:id="@+id/memo_title"
@@ -39,7 +40,32 @@
                 android:textAppearance="@android:style/TextAppearance.Material.Large"
                 android:textSize="18sp" />
 
+            <!--
+            <ViewSwitcher
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/memoTitle_ViewSwitcher"
+                android:layout_above="@+id/memo_preview">
 
+                <EditText
+                    android:visibility="gone"
+                    android:id="@+id/memoTitle_editText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+
+                    android:layout_alignParentTop="true"
+                    android:layout_alignLeft="@+id/memo_seekBar"
+                    android:layout_alignStart="@+id/memo_seekBar"
+                    android:layout_above="@+id/memo_preview"
+                    android:layout_toLeftOf="@+id/play_button"
+                    android:layout_toStartOf="@+id/play_button"
+                    android:inputType="text"
+                    android:layout_marginLeft="10dp" />
+
+
+            </ViewSwitcher>
+            -->
 
             <TextView
                 android:animateLayoutChanges="true"
@@ -53,37 +79,65 @@
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
 
-            <FrameLayout
+            <!-- for switching between the yellow box and the edit box when transcript needs to be edited -->
+            <ViewSwitcher
                 android:visibility="gone"
-                android:animateLayoutChanges="true"
-                android:scrollbars="vertical"
-                android:id="@+id/mtf_card"
-                android:clickable="true"
+                android:id="@+id/view_switcher"
                 android:layout_width="280dp"
-                android:layout_gravity="bottom"
-                android:background="@drawable/card"
-                android:layout_marginTop="18dp"
-                android:elevation="2dp"
-                android:layout_below="@+id/memo_preview"
                 android:layout_centerInParent="true"
-                android:layout_height="140dp">
+                android:layout_gravity="center"
+                android:layout_below="@+id/memo_preview"
+                android:layout_marginTop="18dp"
+                android:layout_height="140dp"
+                android:layout_alignParentTop="false"
+                android:layout_alignParentBottom="false"
+                android:paddingBottom="37dp">
 
-                <TextView
+            <!-- Yellow card. The Transcription Box. -->
+                <FrameLayout
                     android:visibility="gone"
                     android:animateLayoutChanges="true"
-                    android:id="@+id/transcription_full"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center_vertical"
                     android:scrollbars="vertical"
-                    android:paddingTop="15dp"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
-                    android:paddingBottom="15dp"
+                    android:id="@+id/mtf_card"
+                    android:clickable="true"
+                    android:layout_width="280dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/card"
+                    android:layout_marginTop="18dp"
+                    android:elevation="2dp"
+                    android:layout_below="@+id/memo_preview"
+                    android:layout_centerInParent="true"
+                    android:layout_height="140dp">
+
+                    <TextView
+                        android:visibility="gone"
+                        android:animateLayoutChanges="true"
+                        android:id="@+id/transcription_full"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:scrollbars="vertical"
+                        android:paddingTop="15dp"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:paddingBottom="15dp"
+                        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+                </FrameLayout>
+
+                <EditText
+                    android:visibility="gone"
+                    android:id="@+id/hidden_edit_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:background="@drawable/edittext"
+                    android:textColor="@android:color/black"
+                    android:gravity="top|start"
                     android:textAppearance="@android:style/TextAppearance.Material.Medium" />
 
-            </FrameLayout>
-
+            </ViewSwitcher>
 
             <!--
             <ImageButton
@@ -151,6 +205,7 @@
                 android:layout_toStartOf="@+id/rename_button" />
 
             <ImageView
+                android:visibility="visible"
                 android:id="@+id/dropdown_arrow"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
@@ -179,12 +234,26 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/memo_seekBar"
                 style="@android:style/Widget.Material.Light.SeekBar"
-                android:layout_alignLeft="@+id/mtf_card"
-                android:layout_alignStart="@+id/mtf_card"
+                android:layout_above="@+id/delete_button"
+                android:layout_alignLeft="@+id/delete_button"
+                android:layout_alignStart="@+id/delete_button"
+                android:layout_alignRight="@+id/dropdown_arrow"
+                android:layout_alignEnd="@+id/dropdown_arrow" />
+
+            <TextView
+                android:visibility="gone"
+                android:text="Location Here"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/memo_seekBar"
+                android:layout_toLeftOf="@+id/dropdown_arrow"
                 android:layout_toStartOf="@+id/dropdown_arrow"
-                android:layout_above="@+id/play_button"
-                android:layout_alignRight="@+id/mtf_card"
-                android:layout_alignEnd="@+id/mtf_card" />
+                android:layout_marginBottom="20dp"
+                android:drawableLeft="@drawable/ic_location_icon"
+                android:id="@+id/location_textView"
+                android:textAlignment="viewStart"
+                android:textAllCaps="false" />
+
 
             <!--
             <android.support.design.widget.FloatingActionButton

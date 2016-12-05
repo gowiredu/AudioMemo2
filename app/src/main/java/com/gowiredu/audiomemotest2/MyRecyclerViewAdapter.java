@@ -17,6 +17,7 @@ import com.gowiredu.audiomemo.R;
 
 import java.util.ArrayList;
 
+import static android.R.attr.label;
 import static com.gowiredu.audiomemotest2.MainActivity.previewTextToPass;
 
 
@@ -24,18 +25,21 @@ public class MyRecyclerViewAdapter extends RecyclerView
         .Adapter<MyRecyclerViewAdapter
         .DataObjectHolder> {
     private static String LOG_TAG = "MyRecyclerViewAdapter";
-    private ArrayList<String> mDataset;
+    public ArrayList<String> mDataset;
     private static MyClickListener myClickListener;
     //private static MyClickListener myClickListenerLongPress;
 
     //MainActivity getPreviewText = new MainActivity();
-    String previewText = previewTextToPass;
+    //String previewText = previewTextToPass;
+    public TextView theLabel;
+    public TextView theDateTime;
 
     public class DataObjectHolder extends RecyclerView.ViewHolder
             implements View
             .OnClickListener {
-        TextView label;
-        TextView dateTime;
+        TextView label = theLabel;
+        TextView dateTime = theDateTime;
+
 
         public DataObjectHolder(View itemView) {
             super(itemView);
@@ -47,11 +51,13 @@ public class MyRecyclerViewAdapter extends RecyclerView
             //itemView.setOnLongClickListener(this);
         }
 
+        /*
         public void changeColor()
         {
             label.setTextColor(Color.BLUE);
             Log.i("COLOR", "Color changed");
         }
+        */
 
         @Override
         public void onClick(View v) {
@@ -99,7 +105,23 @@ public class MyRecyclerViewAdapter extends RecyclerView
         //int i = MainActivity.getVariable();
 
         holder.label.setText(mDataset.get(position));
-        holder.dateTime.setText(previewText);
+        //holder.dateTime.setText(mDataset.get(position));
+
+        /*
+        if (MainActivity.navCurrentSelected == 2)
+        {
+            holder.label.setTextColor(Color.BLUE);
+        }
+        */
+
+        if (MainActivity.navCurrentSelected == 0 || MainActivity.navCurrentSelected == 1)
+        {
+            holder.dateTime.setText(previewTextToPass.toString());
+        }
+        else
+        {
+            holder.dateTime.setText("Expand for memo");
+        }
 
         /*
         holder.itemView.setOnClickListener(new View.OnClickListener() {
