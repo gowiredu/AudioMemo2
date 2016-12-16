@@ -5,7 +5,9 @@
     <!-- <color name="colorAccent">#FF4081</color> -->
     <color name="colorAccent">#3F51B5</color>
     <color name="yellow">#FFBB00</color>
-    <color name="green">#00FF00</color>
+    <color name="light_green">#00FF00</color>
+    <color name="green">#008000</color>
+    <color name="forest_green">#228B22</color>
     <color name="year">#999999</color>
     <color name="title">#222222</color>
     <color name="purple">#3f51b5</color>

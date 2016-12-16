@@ -1,8 +1,5 @@
 package com.gowiredu.audiomemotest2;
 
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
@@ -13,10 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.Movie;
-import android.location.Location;
-import android.location.LocationManager;
-import android.media.AudioManager;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -25,10 +19,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Message;
 import android.os.StrictMode;
-import android.os.SystemClock;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
@@ -36,7 +28,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -44,7 +35,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -58,56 +48,37 @@ import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.messaging.RemoteMessage;
-import com.google.firebase.storage.StorageMetadata;
 import com.gowiredu.audiomemo.R;
 
-import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 import android.os.Handler;
 import android.widget.ViewSwitcher;
@@ -115,15 +86,7 @@ import android.widget.ViewSwitcher;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.R.attr.data;
-import static android.R.id.edit;
-import static android.R.id.input;
-import static android.R.id.list;
-import static android.R.string.no;
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
-import static com.gowiredu.audiomemo.R.id.location_textView;
-import static com.gowiredu.audiomemo.R.id.textView;
-import static com.gowiredu.audiomemo.R.id.transcription_full;
+import static android.R.attr.id;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -135,17 +98,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.StreamDownloadTask;
 import com.google.firebase.storage.UploadTask;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 
     private ArrayList<String> lines = new ArrayList<>(); // temporarily store names of files in directory
-    //public ListView ResultsListView;
     public FloatingActionButton roundButton;
     private long tempFileName; // temporary file name
-    private String tempString; // temporary string to store name of touched file (to look up for playback or deletion).
+    private StringBuilder tempString; // temporary string to store name of touched file (to look up for playback or deletion).
     public String tempTextfield;
     public StringBuilder tempFileNameOnline;
     public ArrayList<String> audioListArrayList = new ArrayList<>();
@@ -167,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public int touchedPosition;
     public static LayoutInflater inflater;
 
-    // expand/ collapse stuff
+    // expand / collapse stuff
     boolean isExpanded = false;
     public TextView memoTitle;
     public FrameLayout yellowCard;
@@ -184,10 +145,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private long currentAudioLength;
 
 
-    public int prevTouchedPosition;
-    public int currentTouchedPosition;
-    private int resetWidth;
-    private int resetHeight;
     public String theTouchedRecording;
     private static final int PERMISSION_REQUEST_CODE = 200;
     private View view; // for MainActivity (not memo card)
@@ -225,19 +182,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final String nameKey = "nameKey";
     public static final String countKey = "phoneKey";
     public SharedPreferences sharedpreferences;
-    //public static String previewTextToPass;
-    public static ArrayList<String> previewTextToPassArrayList = new ArrayList<>();
     public static StringBuilder previewTextToPass;
 
-    // stringbuilder
-    // load contents of arraylist at i to stringbuilder
-    // load i to the preview.
-    // clear stringbuilder
-    // repeat
 
 
     public MenuItem myMoveGroupItem;
-    // MenuItem myMoveGroupItem = navigationView.getMenu().findItem(R.id.submenu_1);  -- it also works
     public SubMenu subMenu;
     public String categoryName;
 
@@ -246,16 +195,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // for editText (editing a saved Transcript) and memoTitle_editText
     public ViewSwitcher switcher;
-    //public ViewSwitcher switcher2;
     public String editTextString; // temporary store for what is typed into the editText. Will be appended to the textfile when the user hits "Enter"
     public String previousTextStorage; // store what was in the textfile before the user started editing. Will be restored if user touches the back button
     // ...or anywhere else on the screen along with a Toast that says "Edit Cancelled"
     public int onBackPressedCheck; // for knowing the difference between an app exit and an "Edit" exit (cancels the edit) when the back button is pressed.
     //... alternates between 0 and 1.
-
-
-    // later...
-    String stringToSearchFor = ".mp3"; //check if changed file name has ".mp3" at the end. If it doesn't, add it.
 
 
 
@@ -264,21 +208,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     AppLocationService appLocationService;
     String theLocationAddress;
 
+    LinearLayout linearLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        tempString = new StringBuilder();
         tempFileNameOnline = new StringBuilder();
         previewTextToPass = new StringBuilder();
 
         switcher = (ViewSwitcher) findViewById(R.id.view_switcher); // to switch view to the editText for editing a memo transcription.
-        //switcher2 = (ViewSwitcher) findViewById(R.id.memoTitle_ViewSwitcher); // to switch view to the editText for editing a memo title.
 
         view = findViewById(R.id.content); // needed for permissionsGranted() to create Snackbar.
 
-        if (android.os.Build.VERSION.SDK_INT > 9) {
+        if (Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
@@ -289,13 +235,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-
-        // OLD --> ResultsListView = (ListView) findViewById(R.id.ResultsListView);
-
-        //inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        //View vi = inflater.inflate(R.layout.activity_main, null);
 
 
         // FIREBASE STUFF STARTS
@@ -342,9 +281,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-        //inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-
         // NAVIGATION DRAWER STUFF STARTS
         setContentView(R.layout.activity_navigation_drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -358,29 +294,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navCurrentSelected = 0;
 
+
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        navigationView.getMenu().getItem(0).setChecked(true);
+        changeNavHeaderImage(); // set navigation drawer header.
+
+
+        //View test = (View) findViewById(R.id.header_image);
+        //test.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.nav_header_cloud));
+        //linearLayout = (LinearLayout) view.findViewById(R.id.header_image);
+        //linearLayout.setBackgroundResource(R.drawable.nav_header_cloud); //or whatever your image is
+
+
+
+
 
 
         SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String restoredText = prefs.getString(nameKey, null);
 
         if (restoredText != null) {
-            //Toast.makeText(MainActivity.this, restoredText, Toast.LENGTH_LONG).show();
             int restoredInt = prefs.getInt(countKey, 0);
-            //Toast.makeText(MainActivity.this, String.valueOf(restoredInt), Toast.LENGTH_LONG).show();
 
             categoryCount = restoredInt;
 
             myMoveGroupItem = navigationView.getMenu().getItem(2);
-            // MenuItem myMoveGroupItem = navigationView.getMenu().findItem(R.id.submenu_1);  -- it also works!
             subMenu = myMoveGroupItem.getSubMenu();
-            //subMenu.add(tempTextfield);
             subMenu.add(2, categoryCount, Menu.NONE, restoredText);
-            //String name = prefs.getString("name", "No name defined");//"No name defined" is the default value.
-            //int idName = prefs.getInt("idName", 0); //0 is the default value.
         }
 
         //NAVIGATION DRAWER STUFF ENDS
@@ -394,7 +335,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
 
-        //mRecyclerView.setAdapter(new SampleRecycler());
 
 
         // START WITH "Personal" SELECTED AND LOAD THE CONTENTS of "Personal"
@@ -404,15 +344,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mRecyclerView.setAdapter(mAdapter);
 
-
-        //permissionsGranted(view); // check if permissions have been granted.
-
-
-        //mRecyclerView.invalidate();
-        //mAdapter.notifyItemRemoved(touchedPosition);
-
-        //mAdapter.notifyItemChanged(touchedPosition);
-        //mAdapter.notifyItemRemoved(touchedPosition);
+        //navigationView.getMenu().getItem(0).setChecked(true);
+        navigationView.setCheckedItem(R.id.nav_personal);
 
 
 
@@ -424,8 +357,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .MyClickListener() {
             @Override
             public void onItemClick(int position, View view) {
-                //View vi = inflater.inflate(R.layout.recyclerview_item, null);
 
+                if (tempString != null)
+                {
+                    tempString.delete(0, tempString.length());
+                }
 
                 touchedPosition = position; // record current position
 
@@ -434,7 +370,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // prev position.getHeight = 168. Set is expanded to false
 
                 TextView memoTitle = (TextView) view.findViewById(R.id.memo_title);
-                tempString = memoTitle.getText().toString();
+                tempString.append(memoTitle.getText().toString());
+                //Toast.makeText(MainActivity.this, tempString.toString(), Toast.LENGTH_LONG).show();
 
                 expandCollapseLayout(view); // expands (or collapses0 the touched cardview
 
@@ -756,9 +693,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Changes the height and width to the specified *pixels*
         params.height = layout.getHeight();
-        resetHeight = layout.getHeight();
         params.width = layout.getWidth();
-        resetWidth = layout.getWidth();
 
 
         //card = (CardView) view.findViewById(R.id.card_view);
@@ -769,10 +704,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             params.width = layout.getWidth();
             layout.setLayoutParams(params);
 
-            //card.setLayoutParams(new LinearLayout.LayoutParams(CardView.LayoutParams.MATCH_PARENT, 500));
-            //card.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 500));
 
-            // don't need to set visibility of memoTitle. Visible at all times.
             yellowCard.setVisibility(View.VISIBLE);
             full_textView.setVisibility(View.VISIBLE);
             preview_textView.setVisibility(View.INVISIBLE);
@@ -786,7 +718,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             memoSeekBar.setVisibility(View.VISIBLE);
 
             switcher.setVisibility(View.VISIBLE);
-            //switcher2.setVisibility(View.VISIBLE);
             location_textView.setVisibility(View.VISIBLE);
 
 
@@ -798,23 +729,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
 
-            /*
-            // onClickListener for when memo title is touched. So it will turn into editable text for user.
-            memoTitle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    memoTextViewClicked(view);
-                }
-            });
-            */
 
 
             // if the user is currently in the "Uploaded" section...
             if (navCurrentSelected == 2) {
                 // ...change the upload button to a download button when the card expands.
                 uploadButton.setImageResource(R.drawable.ic_download_icon_menu);
-                //full_textView.setText("Unable to display uploaded transcripts");
-                //location_textView.setText("Unable to display uploaded location");
             }
 
 
@@ -822,14 +742,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onClick(View v) {
                     renameButtonTouched();
-                    //renameRecordingDialogTextField();
                 }
             });
 
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    deleteAudioDialog();
+
+                    if (navCurrentSelected == 2)
+                    {
+                        deleteAudioFileUploadedDialog();
+                    }
+                    else
+                    {
+                        deleteAudioDialog();
+                    }
                 }
             });
 
@@ -838,7 +765,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             playButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
 
                     // if the user is in the "Devices" section,  set play button to appropriate local file.
                     if (navCurrentSelected == 0) {
@@ -861,28 +787,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
 
 
-            // onClickListener for Upload button
+            // onClickListener for Upload button (download button, if the user is in the "Uploaded" section).
             uploadButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (navCurrentSelected != 2) {
                         uploadAudio();
                     } else {
-                        downloadAudio();
+                        downloadAudioDialog();
                     }
                 }
             });
 
 
-            //mRecyclerView.scrollToPosition(touchedPosition);
 
             isExpanded = true;
 
             populateTextBox(view);
 
-            //populateLocationTextView();
 
-            // get the name of the touched file and find the audio and text for it.
         }
 
 
@@ -890,11 +813,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else
         {
             params.height = 168;
-            //params.height = 78;
             params.width = layout.getWidth();
             layout.setLayoutParams(params);
-            //card.setLayoutParams(new LinearLayout.LayoutParams(CardView.LayoutParams.MATCH_PARENT, 500));
-            //card.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT));
 
             // else, collapse the card
             yellowCard.setVisibility(View.GONE);
@@ -910,11 +830,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             memoSeekBar.setVisibility(View.GONE);
 
             switcher.setVisibility(View.GONE);
-            //switcher2.setVisibility(View.GONE);
             location_textView.setVisibility(View.GONE);
 
 
-            //pf.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             isExpanded = false;
         }
     }
@@ -959,13 +877,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.d("PERSONAL_AUDIO", "PERSONAL AUDIO Folder Created");
                 Log.d("Audio Folder Directory", Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalAudio");
 
-                /*
-                if ((folderAudioFirstTime.exists())) {
-                    folderTextFirstTime.mkdirs();
-                    Log.d("Folder", "Transcription Folder Created");
-                    Log.d("Folder Directory", Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "MediaRecorderText");
-                }
-                */
             }
 
             if (!(folderFirstTimePersonalText.exists())) {
@@ -1053,9 +964,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         double latitude = gps.getLatitude();
                         double longitude = gps.getLongitude();
 
-                        // \n is for new line
-                        Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-
                         // GET THE ADDRESS OF THE USER'S CURRENT LOCATION. IF NO ADDRESS, LAT and LONG WILL BE STORED INSTEAD.
                         LocationAddress locationAddress = new LocationAddress();
                         locationAddress.getAddressFromLocation(latitude, longitude, MainActivity.this, new GeocoderHandler());
@@ -1089,8 +997,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                 intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
                         "Speak now...");
-                //intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 4000);
-                //intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 4000);
 
                 intent.putExtra("android.speech.extra.GET_AUDIO_FORMAT", "audio/AMR");
                 intent.putExtra("android.speech.extra.GET_AUDIO", true);
@@ -1104,35 +1010,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             Toast.LENGTH_SHORT).show();
                 }
 
-        /*
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(opformats[curFormat]);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        recorder.setOutputFile(getFilePath());
 
-
-        try {
-
-            /*
-            recorder.prepare();
-            recorder.start();
-            /*
-            speech.startListening(recognizerIntent);
-            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra("android.speech.extra.GET_AUDIO_FORMAT", "audio/AMR");
-            intent.putExtra("android.speech.extra.GET_AUDIO", true);
-
-
-            startActivityForResult(intent, );
-
-
-            Log.i("RECORDING", "Recording started");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        */
             }
         };
         Thread speechToTextThread = new Thread(r);
@@ -1224,31 +1102,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             Log.i("TEMP_LOCATIONS_FOLDER", "TempLocations created");
                         }
 
-                        //directory_audioFile = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "TempAudio";
-                        //directory_textFile = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "TempText";
-                        //directory_location = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "TempLocations";
                     }
 
 
                     // GET AUDIO FROM SPEECH-TO-TEXT SERVICES AND SAVE IN APPROPRIATE LOCATION.
                     try {
 
-                        // get audio extras
                         Uri audioUri = data.getData();
                         ContentResolver contentResolver = getContentResolver();
 
                         String audioFileName = Long.toString(tempFileName) + fileExtension[curFormat];
 
-                        //need a global stringbuilder (tempFileNameOnline)
-
-                        tempFileNameOnline.append(audioFileName); // (for recording straight to the database)
+                        if (navCurrentSelected == 2)
+                        {
+                            tempFileNameOnline.delete(0, tempFileNameOnline.length());
+                            tempFileNameOnline.append(audioFileName); // (for recording straight to the database)
+                        }
 
                         File file = new File(directory_audioFile, audioFileName);
                         InputStream filestream = contentResolver.openInputStream(audioUri);
                         OutputStream out = new FileOutputStream(file);
 
 
-                        // **RUNNABLE HERE
                         try {
 
                             byte[] buffer = new byte[4 * 1024]; // or other buffer size
@@ -1276,7 +1151,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     String textFileName = Long.toString(tempFileName) + fileExtension[curFormat] + ".txt";
                     File outputFile = new File(directory_textFile, textFileName);
 
-                    //String test = result_text.get(0);
 
 
                     try {
@@ -1312,26 +1186,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         e.printStackTrace();
                     }
 
-                    /*
-                    try {
-                        FileOutputStream fos = new FileOutputStream(outputFile);
-                        ObjectOutputStream oos = new ObjectOutputStream(fos);
-                        oos.writeObject(test);
-                        fos.close();
-
-                        // convert a "Long" to a "String"
-                        long number = tempFileName;
-                        String numberAsString = Long.toString(number);
-                        lines.add(numberAsString + fileExtension[curFormat]);
-
-                        // refresh the ListView
-                        refreshListView();
-
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    */
 
 
                     String memoLocationFile = Long.toString(tempFileName) + fileExtension[curFormat] + ".txt";
@@ -1341,73 +1195,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     // GET THE USER'S CURRENT LOCATION AND SAVE IT TO A TEXT FILE.
                     try {
 
-                        // get user's current location.
-                        /*
-                        Location location = appLocationService.getLocation(LocationManager.GPS_PROVIDER);
-
-
-                        // If "Location" variable is null, get the current location and update it in that variable.
-                        if (location != null)
-                        {
-                            double latitude = location.getLatitude();
-                            double longitude = location.getLongitude();
-
-                            // GET THE ADDRESS OF THE USER'S CURRENT LOCATION. IF NO ADDRESS, LAT and LONG WILL BE STORED INSTEAD.
-                            LocationAddress locationAddress = new LocationAddress();
-                            locationAddress.getAddressFromLocation(latitude, longitude, getApplicationContext(), new GeocoderHandler());
-                            */
                         FileOutputStream fOut = new FileOutputStream(outputFileLocation); // outputFileLocation is random name + ".txt" saved in a "Locations" folder.
                         OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
                         myOutWriter.append(theLocationAddress); // write the location info to the file.
                         myOutWriter.close();
                         fOut.close();
 
-
-                        //file = new File(directory_location);
-                        //fop = new FileOutputStream(file);
-                        //fop = new FileOutputStream(new File("PersonalLocations.txt"),true);
-
-
-                                /*
-                                if (navCurrentSelected == 0)
-                                {
-                                    myFile = new File(directory_location, "PersonalLocations.txt");
-                                }
-
-                                else if (navCurrentSelected == 1)
-                                {
-                                    myFile = new File(directory_location, "WorkLocations.txt");
-                                }
-
-                                else if (navCurrentSelected == 3)
-                                {
-                                    myFile = new File(directory_location, categoryName + "Locations.txt");
-                                }
-                                else
-                                {
-                                    myFile = new File(directory_location, "Locations.txt");
-                                }
-
-                                // if location text file doesn't exists for any reason, then create it first.
-                                if (!myFile.exists())
-                                {
-                                    myFile.createNewFile();
-                                }
-                                */
-
-
-                        //fop = new FileOutputStream(directory_location, true); // "true" so file will be appended instead of rewritten.
-
-                                /*
-                                // get the content in bytes
-                                byte[] contentInBytes = locationAddress.toString().getBytes();
-
-                                fop.append(contentInBytes);
-                                fop.flush();
-                                fop.close();
-                                */
-
-                        //FileOutputStream fOut = new FileOutputStream(myFile);
 
 
                         Log.i("SAVED_LOCATION", theLocationAddress);
@@ -1423,43 +1216,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         try {
                             uploadAudioYesSelected();
 
-                            /*
-                            // if recording from the uploaded section...
-                            if (navCurrentSelected == 2)
-                            {
-                                // create a temporary audio folder, transcription folder, and locations folder.
-                                // upload the contents of all three folders
-                                // delete those folders (file contents will go too).
-                                // refresh the recyclerview.
-                            }
-                            */
 
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-
-
-                    // **write to text file here.
-                    //FileOutputStream fop = null;
-                    //File file;
-                    //File myFile = null;
-
-
-
-                            /*
-                            } finally {
-                                try {
-                                    if (fop != null)
-                                    {
-                                        fop.close();
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            */
-
 
                 }
                 break;
@@ -1468,29 +1229,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    // Updates the ArrayList and refreshes the ListView to reflect the changes.
-    /*
-    private void listDirectoryFiles() {
-        // convert a "Long" to a "String"
-        long number = tempFileName;
-        String numberAsString = Long.toString(number);
-        lines.add(numberAsString + fileExtension[curFormat]);
-
-        // refresh the ListView
-        refreshRecyclerView();
-    }
-    */
 
 
 
 
 
 
-
-
-    // refreshes the ListView
+    // refreshes the view (reflect changes on the screen)
     private void refreshRecyclerView() {
-        // refresh the listView
         mAdapter.notifyDataSetChanged();
 
 
@@ -1506,65 +1252,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-    /*
-    private void longPressDialogBox() {
-        // create a dialog box asking the user if they would like to rename the recording.
-        android.app.AlertDialog.Builder sendReportBox = new android.app.AlertDialog.Builder(this);
-        sendReportBox.setTitle(tempString);
-        sendReportBox.setMessage("What would you like to do with this memo?");
-        sendReportBox.setCancelable(true);
-
-        sendReportBox.setPositiveButton(
-                "Delete",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(MainActivity.this, "Delete selected", Toast.LENGTH_LONG).show();
-                        dialog.cancel();
-                        deleteAudioDialog();
-                    }
-                });
-
-        sendReportBox.setNegativeButton(
-                "Rename",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(MainActivity.this, "Rename selected", Toast.LENGTH_LONG).show();
-                        dialog.cancel();
-                        renameRecordingDialogTextField();
-                    }
-                });
-
-        sendReportBox.setNeutralButton("Upload",
-                new DialogInterface.OnClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int id)
-                    {
-                        //context.startActivity(new Intent(context, Setup.class));
-                        //dialog.cancel();
-                    }
-                });
-
-        android.app.AlertDialog dialogReportBox = sendReportBox.create();
-        dialogReportBox.show();
-        dialogReportBox.getButton(dialogReportBox.BUTTON_POSITIVE).setTextColor(Color.RED);
-        dialogReportBox.getButton(dialogReportBox.BUTTON_NEGATIVE).setTextColor(Color.DKGRAY);
-        dialogReportBox.getButton(dialogReportBox.BUTTON_NEUTRAL).setTextColor(Color.BLUE);
-
-    }
-    */
-
-
-
-
-
-
-
-
-
     // dialog box with TextField to take new name of file.
     private void renameRecordingDialogTextField() {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
-        builder.setTitle(tempString);
+        builder.setTitle(tempString.toString());
 
         // Set up the input
         final EditText input = new EditText(this);
@@ -1598,7 +1289,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
-        //builder.show();
 
         final android.app.AlertDialog dialogReportBox = builder.create();
         dialogReportBox.show();
@@ -1700,7 +1390,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // go through list of audiofiles, find and rename the right one.
         for (int i = 0; i < audio_files.length; i++)
         {
-            if (audio_files[i].getName().equals(tempString))
+            if (audio_files[i].getName().equals(tempString.toString()))
             {
 
                 //renameTo goes here.
@@ -1719,7 +1409,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // go through list of location text files and rename the appropriate one.
         for (int i = 0; i < location_files.length; i++)
         {
-            if (location_files[i].getName().equals(tempString + ".txt"))
+            if (location_files[i].getName().equals(tempString.toString() + ".txt"))
             {
 
                 //renameTo goes here.
@@ -1738,7 +1428,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // go through list of textfiles, find and rename the right one.
         for (int i = 0; i < text_files.length; i++)
         {
-            if (text_files[i].getName().equals(tempString + ".txt"))
+            if (text_files[i].getName().equals(tempString.toString() + ".txt"))
             {
                 //renameTo goes here.
                 boolean renamed = text_files[i].renameTo(rename_textFile);
@@ -1756,17 +1446,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 audioListArrayList.set(i, tempTextfield + ".mp3");
                 mRecyclerView.invalidate();
                 mAdapter.notifyItemChanged(touchedPosition);
-                //mAdapter.notifyItemRemoved(touchedPosition);
 
                 refreshRecyclerView();
 
 
-                // look for a file named that
-                // reset the textbox to the contents of that file
-
-
-                // finish everything before refreshing ListView (rename audio and text files.
-
             }
         }
 
@@ -1774,147 +1457,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-
-
-
-    // executes after when the user opts in to rename the recording by touching it instead of touching the "Pencil" icon.
-    private void renameRecordingTouch() {
-        // save name of file in temporary string (taken care of with global variable "tempString"
-        // go through the folder looking for a file that matches temporary string
-
-        Log.i("Touched_Renaming", theTouchedRecording);
-
-        String renameRecordingFilePath = null;
-        String renameTextFilePath = null;
-        String renameLocationTextFilePath = null;
-
-
-        if (navCurrentSelected == 0)
-        {
-            renameRecordingFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalAudio";
-            renameTextFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalText";
-            renameLocationTextFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalLocations";
-
-        }
-
-        else if (navCurrentSelected == 1)
-        {
-            renameRecordingFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkAudio";
-            renameTextFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkText";
-            renameLocationTextFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkLocations";
-
-        }
-
-        else if (navCurrentSelected == 3)
-        {
-            renameRecordingFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Audio";
-            renameTextFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Text";
-            renameLocationTextFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Locations";
-
-        }
-
-
-        Log.d("AUDIOFILES", "Current Audio Path: " + renameRecordingFilePath);
-        Log.d("TEXTFILES", "Current Text Path: " + renameTextFilePath);
-        Log.d("LOCATIONFILES", "Current LocationInfo Path: " + renameLocationTextFilePath);
-
-
-        // list audio files
-        File f1 = new File(renameRecordingFilePath);
-        File audio_files[] = f1.listFiles();
-        Log.d("AudioFiles", "Size: " + audio_files.length); // Log for current number of audio files in the folder
-        File rename_audio = new File(renameRecordingFilePath, theTouchedRecording);
-
-
-        // list transcript text files
-        File f2 = new File(renameTextFilePath);
-        File text_files[] = f2.listFiles();
-        Log.d("TextFiles", "Size: " + text_files.length); // Log for current number of text files in the folder
-        File rename_textFile = new File(renameTextFilePath, theTouchedRecording + ".txt");
-
-
-        // list location files
-        File f3 = new File(renameLocationTextFilePath);
-        File location_files[] = f3.listFiles();
-        Log.d("LocationTextFiles", "Size: " + text_files.length); // Log for current number of location text files in the folder
-        File rename_locationTextFile = new File(renameLocationTextFilePath, theTouchedRecording + ".txt");
-
-
-        // go through list of audiofiles, find and rename the appropriate one.
-        for (int i = 0; i < audio_files.length; i++)
-        {
-            if (audio_files[i].getName().equals(theTouchedRecording))
-            {
-
-                //renameTo goes here.
-                boolean renamed = audio_files[i].renameTo(rename_audio);
-
-
-            }
-        }
-
-
-
-
-
-
-
-        // go through list of location text files and rename the appropriate one.
-        for (int i = 0; i < location_files.length; i++)
-        {
-            if (location_files[i].getName().equals(theTouchedRecording))
-            {
-
-                //renameTo goes here.
-                boolean renamed = location_files[i].renameTo(rename_locationTextFile);
-
-
-
-            }
-        }
-
-
-
-
-
-
-        // go through list of textfiles, find and rename the appropriate one.
-        for (int i = 0; i < text_files.length; i++)
-        {
-            if (text_files[i].getName().equals(theTouchedRecording + ".txt"))
-            {
-                //renameTo goes here.
-                boolean renamed = text_files[i].renameTo(rename_textFile);
-
-                // remap path to textfile and reset textbox.
-                inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
-
-                // get file name (memoTitle)
-
-
-                //refreshTextBoxAfterRename(vi);
-                Log.i("TEMPTEXTFIELD2_TOUCH", theTouchedRecording);
-
-                audioListArrayList.set(i, theTouchedRecording);
-                mRecyclerView.invalidate();
-                mAdapter.notifyItemChanged(touchedPosition);
-                //mAdapter.notifyItemRemoved(touchedPosition);
-
-                //refreshRecyclerView();
-
-
-                // look for a file named that
-                // reset the textbox to the contents of that file
-
-
-                // finish everything before refreshing ListView (rename audio and text files.
-
-            }
-        }
-
-
-    }
 
 
 
@@ -1925,7 +1467,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // dialog box asking "Would you like to delete this memo?"
     private void deleteAudioDialog()
     {
-        //AlertDialog.Builder build = new AlertDialog.Builder(this);
 
         android.app.AlertDialog.Builder sendReportBox = new android.app.AlertDialog.Builder(MainActivity.this);
         sendReportBox.setTitle("Delete Memo");
@@ -1938,7 +1479,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 "Yes",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        //Toast.makeText(MainActivity.this, "Delete selected", Toast.LENGTH_LONG).show();
                         deleteAudioFile();
                         dialog.cancel();
                     }
@@ -1948,7 +1488,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 "No",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        //Toast.makeText(MainActivity.this, "Cancel selected", Toast.LENGTH_LONG).show();
                         dialog.cancel();
                     }
                 });
@@ -1992,19 +1531,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 }
 
-                else if (navCurrentSelected == 3) {
-                    deleteRecordingFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + categoryName + "Audio";
-                    deleteTextFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + categoryName + "Text";
-                    deleteLocationInfoPath = Environment.getExternalStorageDirectory().getPath() + File.separator + "Locations";
 
-                }
-
-
-                else
+                else if (navCurrentSelected == 2)
                 {
                     deleteRecordingFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + "TempAudio";
                     deleteTextFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + "TempText";
                     deleteLocationInfoPath = Environment.getExternalStorageDirectory().getPath() + File.separator + "TempLocations";
+                }
+
+                else {
+                    deleteRecordingFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + categoryName + "Audio";
+                    deleteTextFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + categoryName + "Text";
+                    deleteLocationInfoPath = Environment.getExternalStorageDirectory().getPath() + File.separator + categoryName + "Locations";
+
                 }
 
 
@@ -2030,7 +1569,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 File location_files[] = f3.listFiles();
 
 
-                Log.d("Files", "Size: " + location_files.length); // current number of text files in the folder
+                //Log.d("Files", "Size: " + location_files.length); // current number of text files in the folder
 
 
                 // find and delete appropriate audio file.
@@ -2040,7 +1579,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (navCurrentSelected != 2)
                 {
                     for (int i = 0; i < audio_files.length; i++) {
-                        if (audio_files[i].getName().equals(tempString)) {
+                        if (audio_files[i].getName().equals(tempString.toString())) {
                             boolean deleted = audio_files[i].delete();
 
                         }
@@ -2049,7 +1588,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     // find and delete appropriate transcription text file.
                     for (int i = 0; i < text_files.length; i++) {
-                        if (text_files[i].getName().equals(tempString + ".txt")) {
+                        if (text_files[i].getName().equals(tempString.toString() + ".txt")) {
                             boolean deleted = text_files[i].delete();
 
                         }
@@ -2058,7 +1597,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     // find and delete appropriate location text file then refresh the view.
                     for (int i = 0; i < location_files.length; i++) {
-                        if (audio_files[i].getName().equals(tempString)) {
+                        if (location_files[i].getName().equals(tempString.toString() + ".txt")) {
                             boolean deleted = location_files[i].delete();
 
                             //lines.remove(i);
@@ -2076,10 +1615,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // else, if user recorded from the "Uploaded" section, delete the whole folder after upload.
                 else
                 {
-                    //f1.delete();
-                    //f2.delete();
-                    //f3.delete();
-                    Toast.makeText(MainActivity.this, "YAY", Toast.LENGTH_LONG);
+                    f1.delete();
+                    f2.delete();
+                    f3.delete();
                 }
             }
         };
@@ -2108,94 +1646,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
+    // disconnect from online memo service if user closes the app.
     public void onStop() {
         super.onStop();
         Log.i("STOP", "onStop() called");
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
-        //stopRecording();
-    }
-
-
-
-
-
-
-
-    // **NO LONGER IN USE. MARKED FOR DELETION.
-    // NOT USED. MOVED STUFF TO START RECORDING
-    public void speechToTextServiceStart() {
-        /*
-        speech.setRecognitionListener(MainActivity.this);
-        recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
-                "en");
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-                this.getPackageName());
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        */
-        //recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
-
-
-        /*
-        mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                Locale.getDefault());
-        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-                this.getPackageName());
-
-        mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
-        RecognitionListener listener = new RecognitionListener() {
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {
-
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-
-            }
-
-            @Override
-            public void onError(int error) {
-
-            }
-
-            @Override
-            public void onResults(Bundle results) {
-
-            }
-
-            @Override
-            public void onPartialResults(Bundle partialResults) {
-
-            }
-
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-
-            }
-        };
-        mSpeechRecognizer.setRecognitionListener(listener);
-        */
-
     }
 
 
@@ -2205,114 +1662,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*
-    // handle result of speech recognition
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // the resulting text is in the getExtras:
-        Bundle bundle = data.getExtras();
-        ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
-        // the recording url is in getData:
-        Uri audioUri = data.getData();
-        ContentResolver contentResolver = getContentResolver();
-
-        try {
-            InputStream filestream = contentResolver.openInputStream(audioUri);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        // TODO: read audio file from inputstream
-    }
-    */
-
-
-    // **NO LONGER A PART OF THE CODE. MARKED FOR DELETION
-    // stops the recording and frees the MediaRecorder
-    private void stopRecording() {
-        /*
-        if (recorder != null)
-        {
-
-            if (speech != null);
-            {
-                speech.destroy();
-                speech.stopListening();
-
-            }
-
-
-            //Toast.makeText(this, "Memo recorded successfully", Toast.LENGTH_SHORT).show();
-            //speech.stopListening();
-            recorder.stop();
-            recorder.reset();
-            recorder.release();
-            recorder = null;
-        */
-
-        // CREATE TEXT FILE OF RECORDING AND SAVE TO "MEDIARECORDERTEXT"
-        File filePath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "MediaRecorderText");
-
-        String textFileName = Long.toString(tempFileName) + fileExtension[curFormat] + ".txt";
-        File outputFile = new File(filePath, textFileName);
-
-        // write global ArrayList "transcriptBuilder" to txt file
-        try {
-            FileOutputStream fos = new FileOutputStream(outputFile);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(transcriptionBuilder);
-            fos.close();
-            //transcriptionBuilder.clear();
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        // GET AUDIO FILE BACK FROM API
-
-
-        Log.i("MICROPHONE", "Recording stopped");
-        //listDirectoryFiles();
-
-        /*
-        if (m != null)
-        {
-            m.stop();
-            m.reset();
-            m.release();
-            m = null;
-            Log.i("MEDIAPLAYER", "Audio stopped");
-        }*/
-
-    }
-
-
-    private void writeTranscriptionToTextFile() {
-
-
-    }
-
-
-    //** CONTNUE HERE (4:59pm - Wednesday, Nov. 30th)
     // play uploaded audio file
     private void playAudioFileUploaded() {
 
@@ -2321,24 +1670,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                int lineCount = 0;
 
                 try {
 
-                    // get touched position
-                    // open URL file
-                    // read specific line URL and use that as the audio DataSource
-
-                    //File folderUploadedTextFileFirstTime = new File(Environment.getExternalStorageDirectory() + File.separator + "MediaRecorderUploadedURL");
-
-                    // get tempString.
-                    // add .txt to it
-                    // go into MemosUploadedURL and look for tempString + ".txt"
-                    // set that as the audio URI
 
                     String folderUploadedMemoAudioURL = Environment.getExternalStorageDirectory() + File.separator + "MemosUploadedURL";
 
-                    File uploadedMemoAudioURL = new File(folderUploadedMemoAudioURL, tempString + ".txt");
+                    File uploadedMemoAudioURL = new File(folderUploadedMemoAudioURL, tempString.toString() + ".txt");
 
                     //File file = new File(sdcard, "Uploaded Files URL.txt");
 
@@ -2354,61 +1692,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         // convert string to URL and set as play source
                         Log.i("THE_URL", line);
-                        //Log.i("THE_LINE_NO", String.valueOf(lineCount));
-                        //Log.i("TOUCHED POSITION CONF.", String.valueOf(touchedPosition));
 
                         myUri[0] = Uri.parse(line);
 
                     }
                     br.close();
 
-                    //Toast.makeText(MainActivity.this, String.valueOf(lineCount),Toast.LENGTH_LONG).show();
 
-
-                    //memoSeekBar.setProgress(0);
-                    //mDuration = m.getDuration();
-
-
-                    // seekbar stuff goes here
-                    //memoSeekBar1.setMax(mDuration);
-
-                    //Handler mHandler = new Handler();
-                    //inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    //final View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
-
-
-
-
-            /*
-            final Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    if (m.isPlaying())
-                    {
-                        int currentPosition = 0;
-                        int total = m.getDuration();
-                        memoSeekBar1.setMax(total);
-
-                        while (m.isPlaying() && currentPosition < total)
-                        {
-                            try {
-                                Thread.sleep(1000);
-                                //Log.i("SEEKBAR", Integer.toString(currentPosition));
-                                currentPosition = m.getCurrentPosition();
-
-                            } catch (Exception e) {
-                                return;
-                            }
-                            memoSeekBar1.setProgress(currentPosition);
-                            Log.i("SEEKBAR_MOVED", "MOVED TO " + currentPosition);
-                        }
-                    }
-                }
-            };
-            //mHandler.postDelayed(r, 10);
-            Thread playerThread = new Thread(r);
-            playerThread.run();
-            */
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -2420,10 +1710,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         playerThread.run();
 
 
-        //final SeekBar memoSeekBar1 = new SeekBar(this);
 
 
-        // start other thread here
 
 
         // set audio source to URL
@@ -2449,9 +1737,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         public void onPrepared(final MediaPlayer mp) {
                             final Handler seekHandler = new Handler();
                             playButton.setImageResource(R.drawable.ic_stop_icon);
-                            //playButton.setColorFilter((Color.rgb(0, 0, 255)));
-                            //View inflater
-                            // use that to find the seekbar
 
 
 
@@ -2481,10 +1766,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         public void onCompletion(MediaPlayer m) {
                             playButton.setImageResource(R.drawable.ic_play_icon);
                             m.pause();
-                            //m.stop();
-                            //m.reset();
-                            //m.release();
-                            //memoSeekBar.setProgress(0);
                         }
                     });
 
@@ -2501,9 +1782,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // for playing locally stored audio file.
     private void playAudioFile() {
-        // Runnable for MediaPlayer
-        int mDuration;
-        //final SeekBar memoSeekBar1 = new SeekBar(this);
 
         try {
 
@@ -2513,17 +1791,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 // if "Personal" is selected
                 if (navCurrentSelected == 0) {
-                    m.setDataSource(Environment.getExternalStorageDirectory().getPath() + File.separator + "PersonalAudio" + File.separator + tempString);
+                    m.setDataSource(Environment.getExternalStorageDirectory().getPath() + File.separator + "PersonalAudio" + File.separator + tempString.toString());
                 }
 
                 // if "Work" is selected
                 else if (navCurrentSelected == 1) {
-                    m.setDataSource(Environment.getExternalStorageDirectory().getPath() + File.separator + "WorkAudio" + File.separator + tempString);
+                    m.setDataSource(Environment.getExternalStorageDirectory().getPath() + File.separator + "WorkAudio" + File.separator + tempString.toString());
                 }
 
                 // if "Create New Category" is selected
                 else if (navCurrentSelected == 3) {
-                    m.setDataSource(Environment.getExternalStorageDirectory().getPath() + File.separator + categoryName + "Audio" + File.separator + tempString);
+                    m.setDataSource(Environment.getExternalStorageDirectory().getPath() + File.separator + categoryName + "Audio" + File.separator + tempString.toString());
                 }
 
             } catch (IOException e) {
@@ -2536,24 +1814,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 e.printStackTrace();
             }
 
-            //memoSeekBar.setProgress(0);
-            //mDuration = m.getDuration();
-
-
-            // seekbar stuff goes here
-            //memoSeekBar1.setMax(mDuration);
-
-            //Handler mHandler = new Handler();
-            //inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            //final View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
 
             m.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(final MediaPlayer mp) {
                     final Handler seekHandler = new Handler();
                     playButton.setImageResource(R.drawable.ic_stop_icon);
-
-                    //View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
 
                     final SeekBar seekBar = (SeekBar) findViewById(R.id.memo_seekBar);
                     seekBar.setMax(mp.getDuration());
@@ -2575,37 +1841,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-            /*
-            final Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    if (m.isPlaying())
-                    {
-                        int currentPosition = 0;
-                        int total = m.getDuration();
-                        memoSeekBar1.setMax(total);
-
-                        while (m.isPlaying() && currentPosition < total)
-                        {
-                            try {
-                                Thread.sleep(1000);
-                                //Log.i("SEEKBAR", Integer.toString(currentPosition));
-                                currentPosition = m.getCurrentPosition();
-
-                            } catch (Exception e) {
-                                return;
-                            }
-                            memoSeekBar1.setProgress(currentPosition);
-                            Log.i("SEEKBAR_MOVED", "MOVED TO " + currentPosition);
-                        }
-                    }
-                }
-            };
-            //mHandler.postDelayed(r, 10);
-            Thread playerThread = new Thread(r);
-            playerThread.run();
-            */
-
 
             Log.i("PLAY_AUDIO", "Playing Audio");
 
@@ -2615,10 +1850,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public void onCompletion(MediaPlayer m) {
                     playButton.setImageResource(R.drawable.ic_play_icon);
                     m.pause();
-                    //m.stop();
-                    //m.reset();
-                    //m.release();
-                    //memoSeekBar.setProgress(0);
                 }
             });
 
@@ -2629,22 +1860,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    // **NOT IN USE. MARKED FOR DELETION
-    // get the file path
-    private String getFilePath() {
-        tempFileName = System.currentTimeMillis();
-        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
-        File folder = new File(filePath, "MediaRecorderSample"); // create folder for files
-        Log.i("FILEPATH_SET", folder.toString());
-
-        // if "MediaRecorderSample" folder does not exist, create one...
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-
-        //...and add the audio file.
-        return (folder.getAbsolutePath() + "/" + tempFileName + fileExtension[curFormat]);
-    }
 
 
 
@@ -2654,92 +1869,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
+    // get the name of the touched recording (tempString StringBuilder)
+    // append that name to the MemosUploaded file
+    // upload the file.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*
-    // for choosing a recording format (MP3 or 3GPP)
-    private void formatDialogBox()
-    {
-        Log.i("FORMAT", "Format called");
-        AlertDialog.Builder build = new AlertDialog.Builder(this);
-        String formats[] = {"MP3", "3GPP"};
-
-        build.setTitle("Choose a format");
-        build.setSingleChoiceItems(formats, curFormat, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                curFormat = which;
-                dialog.dismiss();
-            }
-        });
-        build.show();
-    }
-    */
-
-
-    // **** RECYCLERVIEW STUFF FROM HERE ONWARD ****
-
-
-    // **NOT IN USE. MARKED FOR DELETION
-    private void seekBarUpdate(final MediaPlayer m) {
-        //inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        //View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
-
-
-        /*
-        final Handler mHandler = new Handler();
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(m.isPlaying()){
-                    int mCurrentPosition = m.getCurrentPosition() / 1000;
-                    seekBar.setProgress(mCurrentPosition);
-                }
-                //mHandler.postDelayed(this, 1000);
-            }
-        });
-        */
-        /*
-        Timer mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-
-            @Override
-            public void run() {
-                MainActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-
-                        if (!(amoungToupdate * memoSeekBar.getProgress() >= duration))
-                        {
-                            int p = memoSeekBar.getProgress();
-                            p += 1;
-                            memoSeekBar.setProgress(p);
-                        }
-                    }
-                });
-            };
-        }, amoungToupdate);
-        */
-    }
-
-
-    // get and display files (for every category except "Uploaded"
+    // get and display files (for every category except "Uploaded")
     private ArrayList<String> getDataSet() {
 
         try {
@@ -2837,108 +1972,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         return audioListArrayList;
     }
-    //Log.i("COUNT", "Number of files set: " + count);
 
 
-    /*
-     for (int index = 0; index < file2.length; index++)
-            {
-                TextView memoPreview = (TextView)vi.findViewById(R.id.memo_preview);
-                StringBuilder text = new StringBuilder();
-
-                try {
-                    BufferedReader br = new BufferedReader(new FileReader(filePath2 + File.separator + file2[index]));
-                    String line;
-
-                    while ((line = br.readLine()) != null)
-                    {
-                        text.append(line);
-                    }
-
-                } catch (IOException e) {
-                    Toast.makeText(getApplicationContext(), "Couldn't display memo", Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                }
-                memoPreview.setText(text);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return audioListArrayList;
-    }
-     */
-
-
-    // **NOT IN USE. MARKED FOR DELETION.
-    public void playAudio(View view) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-
-                final MediaPlayer m = new MediaPlayer();
-
-                try {
-                    m.setDataSource(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "MediaRecorderSample" + File.separator + tempString);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    m.prepare();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                //audio_progress.setMax(m.getDuration());
-                playButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        m.start();
-                        Log.i("PLAY_AUDIO", "Playing Audio");
-
-                        // check if audio is done. If it is, release the mediaplayer automatically.
-                        m.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer m) {
-                                m.stop();
-                                m.reset();
-                                m.release();
-
-                                Log.i("ONCOMPLETION_AUDIO", "Audio Completed");
-                            }
-                        });
-                    }
-                });
-
-
-                /*
-                stopButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (m.isPlaying())
-                        {
-                            m.stop();
-                            m.reset();
-                            m.release();
-
-                            Log.i("STOPPED_AUDIO", "Audio Stopped");
-                        }
-                    }
-                });
-                */
-
-                //playButton.setEnabled(false);
-
-
-                // check if MediaPlayer (audio) is done.
-            }
-        };
-        Thread playerThread = new Thread(r);
-        playerThread.run();
-    }
 
 
     // populate transcript text box and location info
@@ -2967,8 +2002,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 // else if "Personal" is selected
                 if (navCurrentSelected == 0) {
-                    filePathText = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalText" + File.separator + tempString + ".txt");
-                    filePathLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalLocations" + File.separator + tempString + ".txt");
+                    filePathText = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalText" + File.separator + tempString.toString() + ".txt");
+                    filePathLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalLocations" + File.separator + tempString.toString() + ".txt");
 
 
                     // try to load contents of transcription file
@@ -2997,7 +2032,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         while ((line = br.readLine()) != null) {
                             locationInfoStringBuilder.append(line);
-                            //text.append('\n');
                         }
 
                         locationTextView.setText(locationInfoStringBuilder);
@@ -3018,8 +2052,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 // else if "Work" is selected
                 else if (navCurrentSelected == 1) {
-                    filePathText = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkText" + File.separator + tempString + ".txt");
-                    filePathLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkLocations" + File.separator + tempString + ".txt");
+                    filePathText = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkText" + File.separator + tempString.toString() + ".txt");
+                    filePathLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkLocations" + File.separator + tempString.toString() + ".txt");
 
 
                     // try to load contents of transcription text file
@@ -3029,7 +2063,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         while ((line = br.readLine()) != null) {
                             transcriptionStringBuilder.append(line);
-                            //text.append('\n');
                         }
                         fullTranscription.setText(transcriptionStringBuilder);
 
@@ -3048,7 +2081,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         while ((line = br.readLine()) != null) {
                             locationInfoStringBuilder.append(line);
-                            //text.append('\n');
                         }
 
                         locationTextView.setText(locationInfoStringBuilder);
@@ -3071,80 +2103,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // else if "Uploaded" is selected
                 else if (navCurrentSelected == 2) // UPLOADED SECTION SELECTED
                 {
-                    // go through the "MemoTranscriptsUploaded" file.
-                    // find a file named theTouchedRecording + ".txt" in that folder.
-                    // go to the URL in that text file
-                    // get the
-
-
-
-
-
-
-
-                    // fullTranscription.setText("Unable to display uploaded memos. Please download memo to view.");
-
-                    // read txt file
-                    // turn string into URL
-                    // use that URL to find file and populate yellow textview
-
-                    /*
-                    URL textURL;
-                    URLConnection conn;
-
-                    filePathText = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "MemosUploadedURL" + File.separator + "Uploaded Files URL.txt");
-
-                    try {
-                        // Create a URL for the desired page
-
-
-                        BufferedReader br = new BufferedReader(new FileReader(filePathText));
-                        String line;
-
-                        int lineCount = 0;
-
-
-                        while ((line = br.readLine()) != null) {
-                            //touched position check here
-
-                            if (lineCount == touchedPosition) {
-                                //text.append(line);
-                                //text.append('\n');
-
-                                // convert string to URL and set as textfile source
-                                textURL = new URL(line);
-                                conn = textURL.openConnection();
-                                conn.connect();
-
-
-                                // open url with text file
-                                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                                String str;
-
-                                while ((str = in.readLine()) != null) {
-                                    // str is one line of text; readLine() strips the newline character(s)
-                                    transcriptionStringBuilder.append(str);
-
-                                }
-                                //text.append('\n');
-
-                            } else {
-                                lineCount++;
-                            }
-
-                        }
-
-
-
-                        fullTranscription.setText(transcriptionStringBuilder.toString());
-                        Log.i("FULL_TRANSCRIPTION_TEXT", transcriptionStringBuilder.toString());
-
-
-                    } catch (IOException e) {
-                        Toast.makeText(getApplicationContext(), "Couldn't display memo", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
-                    */
 
 
 
@@ -3158,7 +2116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
                                 try {
-                                    BufferedReader br = new BufferedReader(new FileReader(folderUploadedTranscriptFile + File.separator + theTouchedRecording + ".txt"));
+                                    BufferedReader br = new BufferedReader(new FileReader(folderUploadedTranscriptFile + File.separator + tempString.toString() + ".txt"));
                                     String line;
 
                                     // read the URL the user will be going to from the appropriate file.
@@ -3205,7 +2163,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
                                 try {
-                                    BufferedReader br = new BufferedReader(new FileReader(folderUploadedTranscriptFile + File.separator + theTouchedRecording + ".txt"));
+                                    BufferedReader br = new BufferedReader(new FileReader(folderUploadedTranscriptFile + File.separator + tempString.toString() + ".txt"));
                                     String line;
 
                                     // read the URL the user will be going to from the appropriate file.
@@ -3249,8 +2207,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 else if (navCurrentSelected == 3)
                 {
-                    filePathText = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Text" + File.separator + tempString + ".txt");
-                    filePathLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Locations" + File.separator + tempString + ".txt");
+                    filePathText = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Text" + File.separator + tempString.toString() + ".txt");
+                    filePathLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Locations" + File.separator + tempString.toString() + ".txt");
 
 
                     // try to load contents of transcription text file
@@ -3260,7 +2218,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         while ((line = br.readLine()) != null) {
                             transcriptionStringBuilder.append(line);
-                            //text.append('\n');
                         }
                         fullTranscription.setText(transcriptionStringBuilder);
 
@@ -3279,7 +2236,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         while ((line = br.readLine()) != null) {
                             locationInfoStringBuilder.append(line);
-                            //text.append('\n');
                         }
 
                         locationTextView.setText(locationInfoStringBuilder);
@@ -3296,25 +2252,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Thread playerThread = new Thread(r);
         playerThread.run();
 
-        //Log.i("TEXTFILES", filePath.listFiles());
 
     }
-
-    public void populateTextBoxUploaded() {
-        // access online txt file. Read contents into
-    }
-
-    /*
-    public void populateLocationTextView()
-    {
-
-        // check current category and set directory according to category.
-        // match touchedPosition with line in appropriate text file.
-        // get that line and put it in as the location.
-
-
-    }
-    */
 
 
 
@@ -3352,45 +2291,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     while ((line = br.readLine()) != null) {
                         text.append(line);
-                        //text.append('\n');
                     }
                 } catch (IOException e) {
                     Toast.makeText(getApplicationContext(), "Couldn't display memo", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
-                //TextView memoTitleRename = (TextView) view.findViewById(R.id.memo_title);
                 TextView fullTranscription = (TextView) view.findViewById(R.id.transcription_full);
 
-                //memoTitleRename.setText(mp3ExtensionAdd);
                 fullTranscription.setText(text);
             }
         };
         Thread playerThread = new Thread(r);
         playerThread.run();
 
-        //Log.i("TEXTFILES", filePath.listFiles());
 
     }
 
-    // find both files (DONE)
-    // rename them using the String tempTextField (DONE)
-    // look for a file mp3Extension add
-    // if found, open that file and read its contents into the yellow textbox
-    // set memoTitle to the mp3ExtensionAdd
 
 
     private void permissionsGranted(View vi)
     {
-        //inflater = (LayoutInflater)MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        //View vi = inflater.inflate(R.layout.activity_main, null);
 
         if (checkPermission()) {
 
-            //Snackbar.make(vi, "Permission already granted.", Snackbar.LENGTH_LONG).show();
-            //Toast.makeText(MainActivity.this, "Permissions already granted", Toast.LENGTH_LONG).show();
         } else {
             Snackbar.make(vi, "Please allow permissions.", Snackbar.LENGTH_LONG).show();
-            //Toast.makeText(MainActivity.this, "Please request permission.", Toast.LENGTH_LONG).show();
         }
 
         if (!checkPermission()) {
@@ -3501,17 +2426,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        /*
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        */
+        int id = item.getItemId();
 
         return super.onOptionsItemSelected(item);
     }
@@ -3530,6 +2446,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // else if "Personal" is selected
         if (id == R.id.nav_personal) {
 
+            if (tempFileNameOnline != null)
+            {
+                tempFileNameOnline.delete(0, tempFileNameOnline.length());
+            }
+
             if (changeRoundButtonColorFlag == 1) {
                 changeRoundButtonColorFlag = 0;
                 changeRoundButtonColor();
@@ -3541,6 +2462,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             else {
                 navCurrentSelected = 0;
+
+                changeNavHeaderImage(); // change the navigation drawer header image.
 
                 audioListArrayList.clear();
 
@@ -3557,6 +2480,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // else if "Work" is selected
         else if (id == R.id.nav_work)
         {
+
+            if (tempFileNameOnline != null)
+            {
+                tempFileNameOnline.delete(0, tempFileNameOnline.length());
+            }
+
             if (changeRoundButtonColorFlag == 1)
             {
                 changeRoundButtonColorFlag = 0;
@@ -3568,6 +2497,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 navCurrentSelected = 1;
 
+                changeNavHeaderImage(); // change the navigation drawer header image.
+
                 audioListArrayList.clear();
 
                 mAdapter = new MyRecyclerViewAdapter(getDataSet());
@@ -3577,13 +2508,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mRecyclerView.invalidate();
                 refreshRecyclerView();
 
-                // CLEAR ARRAYLIST HERE
             }
         }
 
         // else if "Uploaded" is selected
         else if (id == R.id.nav_uploaded)
         {
+
+            if (tempFileNameOnline != null)
+            {
+                tempFileNameOnline.delete(0, tempFileNameOnline.length());
+            }
 
             if (changeRoundButtonColorFlag == 0) {
                 changeRoundButtonColorFlag = 1;
@@ -3595,6 +2530,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
 
                 navCurrentSelected = 2;
+
+                changeNavHeaderImage();
 
                 audioListArrayListUploaded.clear();
 
@@ -3613,53 +2550,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
 
-        } else if (id == R.id.nav_add) {
+        }
 
-            /*
-            Menu m = navigationView.getMenu();
+        else if (id == R.id.nav_add)
+        {
 
-            for (int i = 0; i < m.size(); i++)
+            if (tempFileNameOnline != null)
             {
-                Log.i("MENU", m.getItem(i).toString());
+                tempFileNameOnline.delete(0, tempFileNameOnline.length());
             }
 
-            m.add(R.id.nav_view, Menu.NONE, 1, "Item2");
-            */
 
             // dialog box to add new category
             addNewCategory();
 
-            /*
-            Random r = new Random();
-            int i = r.nextInt(100);
-            MenuItem myMoveGroupItem = navigationView.getMenu().getItem(2);
-            // MenuItem myMoveGroupItem = navigationView.getMenu().findItem(R.id.submenu_1);  -- it also works!
-            SubMenu subMenu = myMoveGroupItem.getSubMenu();
-            subMenu.add("Item "+ i);
-            */
+        }
 
-            /*
-            for (int in = 0; in < subMenu.size(); in++)
+        else if (id % 10 == 0)
+        {
+
+            if (tempFileNameOnline != null)
             {
-                Log.i("MENU", subMenu.getItem(in).toString());
+                tempFileNameOnline.delete(0, tempFileNameOnline.length());
             }
-            */
 
-
-            //m = navView.getMenu;
-            //MenuItem mi = m.getItem(m.size()-1);
-            //mi.setTitle(mi.getTitle());
-        } else if (id % 10 == 0) {
-            if (changeRoundButtonColorFlag == 1) {
+            if (changeRoundButtonColorFlag == 1)
+            {
                 changeRoundButtonColorFlag = 0;
                 changeRoundButtonColor();
             }
 
             navCurrentSelected = 3;
 
+            changeNavHeaderImage(); // change the navigation drawer header image.
+
+
             categoryName = item.toString();
             // get name of that category
-            Toast.makeText(MainActivity.this, item.toString(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(MainActivity.this, item.toString(), Toast.LENGTH_LONG).show();
 
             navigationView.getMenu().getItem(2).setChecked(true);
 
@@ -3673,18 +2601,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mRecyclerView.invalidate();
             refreshRecyclerView();
 
-            //navigationView.getMenu().getItem(2)
-
-
-            // get name of category.
-            // attach "audio" to it and use that to find a folder.
-            // do the same with text.
         }
-        /*
-        else if (id == R.id.nav_share) {
 
-        }
-        */
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -3694,20 +2612,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // for when "Uploaded" is selected.
     private void changeRoundButtonColor() {
-        /*
-        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), R.color.colorAccent, R.color.colorPrimary);
-        colorAnimation.setDuration(8000); // milliseconds
-        colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
-                roundButton.setBackgroundTintList(ColorStateList.valueOf(Color.CYAN));
-                System.out.println("Working");
-            }
-
-        });
-        colorAnimation.start();
-        */
 
         if (changeRoundButtonColorFlag == 1) {
             ScaleAnimation anim = new ScaleAnimation(0, 1, 0, 1, 50, 50); // 50, 50 is so it animates from the center outward.
@@ -3736,19 +2640,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
 
-        /*
-        ScaleAnimation animReappear = new ScaleAnimation(0, 1, 0, 1, 50, 50); // 50, 50 is so it animates from the center outward.
-        animReappear.setFillBefore(true);
-        animReappear.setFillAfter(true);
-        animReappear.setFillEnabled(true);
-        animReappear.setDuration(500);
-        animReappear.setInterpolator(new OvershootInterpolator());
-
-        animReappear.setStartOffset(3000);
-        roundButton.startAnimation(animReappear);
-        */
-
-
     }
 
 
@@ -3773,12 +2664,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        tempTextfield = input.getText().toString();
+                        tempTextfield = input.getText().toString().trim();
 
-                /*
-                Random r = new Random();
-                int i = r.nextInt(1000000000);
-                */
 
                         categoryCount += 10; // save this to SharedPreferences every time so IDs are not replicated.
 
@@ -3799,9 +2686,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         editor.putInt(countKey, categoryCount);
                         editor.apply();
 
-
-                        // save navigation id to SharedPreferences
-                        // save name to SharedPreferences
                     }
                 });
 
@@ -3814,8 +2698,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
 
-
-                //builder.show();
 
                 android.app.AlertDialog dialogReportBox = builder.create();
                 dialogReportBox.show();
@@ -3848,13 +2730,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.d("NEW_CATEGORY_AUDIO", tempTextfield + "AUDIO Folder Created");
                 Log.d("Audio Folder Directory", Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + tempTextfield + "Audio");
 
-                /*
-                if ((folderAudioFirstTime.exists())) {
-                    folderTextFirstTime.mkdirs();
-                    Log.d("Folder", "Transcription Folder Created");
-                    Log.d("Folder Directory", Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "MediaRecorderText");
-                }
-                */
             }
 
             if (!(folderFirstTimeNewCategoryText.exists())) {
@@ -3865,7 +2740,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
             if (!(folderFirstTimeNewCategoryLocations.exists())) {
-                folderFirstTimeNewCategoryText.mkdirs();
+                folderFirstTimeNewCategoryLocations.mkdirs();
                 Log.d("NEW_CATEGORY_TEXT", tempTextfield + "LOCATIONS Folder Created");
                 Log.d("Folder Directory", Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + tempTextfield + "Locations");
             }
@@ -3903,36 +2778,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         dialog.cancel();
                         uploadAudioYesSelected();
 
-                        /*
-
-                        filepathText.updateMetadata(metadataText)
-                                .addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                                    @Override
-                                    public void onSuccess(StorageMetadata storageMetadata) {
-                                        // Updated metadata is in storageMetadata
-                                        Toast.makeText(MainActivity.this, "Text Metadata added.", Toast.LENGTH_LONG).show();
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception exception) {
-                                        Toast.makeText(MainActivity.this, "Unable to write text metadata.", Toast.LENGTH_LONG).show();
-                                    }
-                                });
-
-                        filepathText.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                            @Override
-                            public void onSuccess(StorageMetadata storageMetadata) {
-                                Log.i("METADATA_TEST_TEXT", storageMetadata.toString());
-                            }
-                        });
-
-                        Log.i("textMetadata", filepathAudio.getName());
-                        */
-
-
-                        // textfile to save audio file names
-                        // find files in database with contents of txt file.
                     }
                 });
 
@@ -3967,23 +2812,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (navCurrentSelected == 0)
         {
-            audioToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalAudio" + File.separator + tempString;
-            textToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalText" + File.separator + tempString + ".txt";
-            locationToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalLocations" + File.separator + tempString + ".txt";
+            audioToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalAudio" + File.separator + tempString.toString();
+            textToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalText" + File.separator + tempString.toString() + ".txt";
+            locationToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalLocations" + File.separator + tempString.toString() + ".txt";
         }
 
         else if (navCurrentSelected == 1)
         {
-            audioToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkAudio" + File.separator + tempString;
-            textToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkText" + File.separator + tempString + ".txt";
-            locationToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkLocations" + File.separator + tempString + ".txt";
+            audioToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkAudio" + File.separator + tempString.toString();
+            textToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkText" + File.separator + tempString.toString() + ".txt";
+            locationToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "WorkLocations" + File.separator + tempString.toString() + ".txt";
         }
 
         else if (navCurrentSelected == 3)
         {
-            audioToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Audio" + File.separator + tempString;
-            textToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Text" + File.separator + tempString + ".txt";
-            locationToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Locations" + File.separator + tempString + ".txt";
+            audioToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Audio" + File.separator + tempString.toString();
+            textToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Text" + File.separator + tempString.toString() + ".txt";
+            locationToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + categoryName + "Locations" + File.separator + tempString.toString() + ".txt";
         }
 
         else
@@ -3993,9 +2838,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             locationToUploadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "TempLocations" + File.separator + tempFileNameOnline.toString() + ".txt";
         }
 
-
-        //go through the arraylist until you find a file tha
-        // call delete on both files after
 
 
         mProgress = new ProgressDialog(MainActivity.this);
@@ -4021,25 +2863,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         else
         {
-            filepathAudio = mStorage.child("UploadedAudio").child(tempString);
+            filepathAudio = mStorage.child("UploadedAudio").child(tempString.toString());
 
-            filepathText = mStorage.child("UploadedText").child(tempString + ".txt");
+            filepathText = mStorage.child("UploadedText").child(tempString.toString() + ".txt");
 
-            filepathLocation = mStorage.child("UploadedLocations").child(tempString + ".txt");
+            filepathLocation = mStorage.child("UploadedLocations").child(tempString.toString() + ".txt");
         }
 
 
-        /*
-
-        StorageMetadata metadataAudio = new StorageMetadata.Builder()
-                .setCustomMetadata(tempString, null)
-                .build();
-
-        StorageMetadata metadataText = new StorageMetadata.Builder()
-                .setCustomMetadata(tempString + ".txt", null)
-                .build();
-
-        */
 
         // directories of the file that needs to be uploaded
         final Uri uriAudio = Uri.fromFile(new File(audioToUploadFilePath));
@@ -4071,15 +2902,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 folderUploadedMemoAudioURL.mkdirs();
                             }
 
-                            // **FOR WHEN UPLOADED IS SELECTED (getDataSetUploaded)
-                            // txt file with txt file named after the audio file (MemosUploaded).
-                            // get the name of that file and set it to the name on the card.
-
-                            // then go to folder MemoUploadedURL.
-                            // find filename + ".txt" and read the URL there. Set the audio source to that URL.
-
-                            // then go to folder (call it "MemosUploadedTranscriptsURL").
-                            // find filename + ".txt" and read the URL there. Set the transcript source to that URL.
 
 
 
@@ -4087,25 +2909,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-                            // write memo name to text file (filename + ".txt") in "MemosUploaded" folder
-                            File uploadedMemoAudio = new File(folderUploadedMemoAudio, tempFileNameOnline + ".txt");
-                            FileWriter writer1 = new FileWriter(uploadedMemoAudio, true);
-                            writer1.append(tempFileNameOnline);
-                            //writer1.append("\n");
-                            writer1.flush();
-                            writer1.close();
+                            // if user is not in the "Uploaded" section...
+                            if (navCurrentSelected != 2)
+                            {
 
-                            Toast.makeText(MainActivity.this, "Saved Audio name to 'Uploaded Files.txt'", Toast.LENGTH_LONG).show();
+                                // write memo name to text file (filename + ".txt") in "MemosUploaded" folder
+                                File uploadedMemoAudio = new File(folderUploadedMemoAudio, tempString.toString() + ".txt");
+                                FileWriter writer1 = new FileWriter(uploadedMemoAudio, true);
+                                writer1.append(tempString.toString());
+                                //writer1.append("\n");
+                                writer1.flush();
+                                writer1.close();
 
 
-                            // write memo audio URL to text file (filename + ".txt") in "MemosUploadedURL" folder
-                            File uploadedMemoAudioURL = new File(folderUploadedMemoAudioURL, tempFileNameOnline + ".txt");
-                            FileWriter writer2 = new FileWriter(uploadedMemoAudioURL, true);
-                            writer2.append(fileUriAudio);
-                            //writer2.append("\n");
-                            writer2.flush();
-                            writer2.close();
-                            Toast.makeText(MainActivity.this, "Saved Audio URL to 'Uploaded Files URL.txt'", Toast.LENGTH_LONG).show();
+                                // write memo audio URL to text file (filename + ".txt") in "MemosUploadedURL" folder
+                                File uploadedMemoAudioURL = new File(folderUploadedMemoAudioURL, tempString.toString() + ".txt");
+                                FileWriter writer2 = new FileWriter(uploadedMemoAudioURL, true);
+                                writer2.append(fileUriAudio);
+                                //writer2.append("\n");
+                                writer2.flush();
+                                writer2.close();
+                            }
+
+                            else
+                            {
+
+                                // write memo name to text file (filename + ".txt") in "MemosUploaded" folder
+                                File uploadedMemoAudio = new File(folderUploadedMemoAudio, tempFileNameOnline.toString() + ".txt");
+                                FileWriter writer1 = new FileWriter(uploadedMemoAudio, true);
+                                writer1.append(tempFileNameOnline);
+                                //writer1.append("\n");
+                                writer1.flush();
+                                writer1.close();
+
+
+                                // write memo audio URL to text file (filename + ".txt") in "MemosUploadedURL" folder
+                                File uploadedMemoAudioURL = new File(folderUploadedMemoAudioURL, tempFileNameOnline.toString() + ".txt");
+                                FileWriter writer2 = new FileWriter(uploadedMemoAudioURL, true);
+                                writer2.append(fileUriAudio);
+                                //writer2.append("\n");
+                                writer2.flush();
+                                writer2.close();
+                            }
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -4120,31 +2965,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
-                        /*
-                        filepathAudio.updateMetadata(metadataAudio)
-                                .addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                                    @Override
-                                    public void onSuccess(StorageMetadata storageMetadata) {
-                                        // Updated metadata is in storageMetadata
-                                        Toast.makeText(MainActivity.this, "Audio Metadata added.", Toast.LENGTH_LONG).show();
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception exception) {
-                                        Toast.makeText(MainActivity.this, "Unable to write audio metadata.", Toast.LENGTH_LONG).show();
-                                    }
-                                });
 
-
-
-                        filepathAudio.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                            @Override
-                            public void onSuccess(StorageMetadata storageMetadata) {
-                                Log.i("METADATA_TEST_AUDIO", storageMetadata.toString());
-                            }
-                        });
-                        */
 
 
         // UPLOAD THE LOCATION FILE.
@@ -4165,18 +2986,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
 
-                try {
-                    File uploadedLocationsFileURL = new File(folderUploadedLocationsFile, tempFileNameOnline + ".txt");
-                    FileWriter writer3 = new FileWriter(uploadedLocationsFileURL, true);
-                    writer3.append(fileUriLocation);
-                    writer3.flush();
-                    writer3.close();
-                    Toast.makeText(MainActivity.this, "Saved Location URL to " + tempFileNameOnline + ".txt", Toast.LENGTH_LONG).show();
+                // if user is not in the "Uploaded" section...
+                if (navCurrentSelected != 2)
+                {
+                    try {
+                        File uploadedLocationsFileURL = new File(folderUploadedLocationsFile, tempString.toString() + ".txt");
+                        FileWriter writer3 = new FileWriter(uploadedLocationsFileURL, true);
+                        writer3.append(fileUriLocation);
+                        writer3.flush();
+                        writer3.close();
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    mProgress.dismiss();
-                    //tempFileNameOnline.delete(0, tempFileNameOnline.length());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        mProgress.dismiss();
+                    }
+                }
+
+                else
+                {
+                    try {
+                        File uploadedLocationsFileURL = new File(folderUploadedLocationsFile, tempFileNameOnline.toString() + ".txt");
+                        FileWriter writer3 = new FileWriter(uploadedLocationsFileURL, true);
+                        writer3.append(fileUriLocation);
+                        writer3.flush();
+                        writer3.close();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        mProgress.dismiss();
+                    }
                 }
             }
         });
@@ -4199,21 +3037,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
 
-                try {
-                    File uploadedTranscriptFileURL = new File(folderUploadedTranscriptFile, tempFileNameOnline + ".txt");
-                    FileWriter writer3 = new FileWriter(uploadedTranscriptFileURL, true);
-                    writer3.append(fileUriText);
-                    //writer3.append("\n");
-                    writer3.flush();
-                    writer3.close();
-                    Toast.makeText(MainActivity.this, "Saved Transcript File URL to " + tempFileNameOnline + ".txt", Toast.LENGTH_LONG).show();
-                    //tempFileNameOnline.delete(0, tempFileNameOnline.length());
-                    mProgress.dismiss();
+                // if user is not in the "Uploaded" section...
+                if (navCurrentSelected != 2)
+                {
+                    try {
+                        File uploadedTranscriptFileURL = new File(folderUploadedTranscriptFile, tempString.toString() + ".txt");
+                        FileWriter writer3 = new FileWriter(uploadedTranscriptFileURL, true);
+                        writer3.append(fileUriText);
+                        //writer3.append("\n");
+                        writer3.flush();
+                        writer3.close();
+                        //tempFileNameOnline.delete(0, tempFileNameOnline.length());
+                        mProgress.dismiss();
 
-                } catch (IOException e) {
-                    mProgress.dismiss();
-                    //tempFileNameOnline.delete(0, tempFileNameOnline.length());
-                    e.printStackTrace();
+                    } catch (IOException e) {
+                        mProgress.dismiss();
+                        //tempFileNameOnline.delete(0, tempFileNameOnline.length());
+                        e.printStackTrace();
+                    }
+                }
+
+
+
+                else
+                {
+                    try {
+                        File uploadedTranscriptFileURL = new File(folderUploadedTranscriptFile, tempFileNameOnline.toString() + ".txt");
+                        FileWriter writer3 = new FileWriter(uploadedTranscriptFileURL, true);
+                        writer3.append(fileUriText);
+                        //writer3.append("\n");
+                        writer3.flush();
+                        writer3.close();
+                        //tempFileNameOnline.delete(0, tempFileNameOnline.length());
+                        mProgress.dismiss();
+
+                    } catch (IOException e) {
+                        mProgress.dismiss();
+                        //tempFileNameOnline.delete(0, tempFileNameOnline.length());
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -4221,16 +3083,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     private ArrayList<String> getDataSetUploaded() {
-        // refresh adapter with stuff in Firebase
-
-        // check txt file with names of uploaded files.
-        // set memoTitle to the file names in the txt file.
-        // when the user expands a card, the URL to play the audio should be completed with tempString (the name of the recording the user touched)
-
-
-        // open the file with the uploaded file names. Load them into the adapter arraylist.
-        // refresh the adapter with those contents.
-
 
         inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -4239,18 +3091,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void run() {
                 try {
 
-                    // go to MemosUploaded file
-                    // get file names of every file there.
-
-                    // go to MemosUploadedURL
-                    // set audio data source to those URLs
-
-                    // go to MemoTranscriptsUploadedURL
-                    // set transcript file source to those URLs
 
                     String folderUploadedMemoAudio = Environment.getExternalStorageDirectory() + File.separator + "MemosUploaded";
 
-                    //File transcriptTextFile = new File(folderUploadedMemoAudio, "Uploaded Files.txt");
 
 
                     // list files in "MemosUploaded" folder.
@@ -4278,12 +3121,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             e.printStackTrace();
                         }
 
-                        //audioListArrayListUploaded.add(audio_filesUploaded[i].getName());
                     }
 
-
-                    // go through each text file in the "MemosUploaded"
-                    // load the contents into "audioListArrayListUploaded"
 
 
 
@@ -4296,17 +3135,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-                    /*
-                    BufferedReader br = new BufferedReader(new FileReader(textFile));
 
-                    StringBuilder text = new StringBuilder();
-                    String line;
-
-                    while ((line = br.readLine()) != null) {
-                        audioListArrayListUploaded.add(line);
-                    }
-                    br.close();
-                    */
 
                     Log.i("Uploaded Files", audioListArrayListUploaded.toString());
 
@@ -4315,10 +3144,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
                     for (int i = 0; i < audioListArrayListUploaded.size(); i++) {
-                        View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
+                        View vi = inflater.inflate(R.layout.recyclerview_item, null);
                         TextView memoTitle = (TextView) vi.findViewById(R.id.memo_title); //get a reference to the textview on the recyclerview_item.xml file.
                         memoTitle.setText(audioListArrayListUploaded.get(i));
-                        //memoTitle.setTextColor(Color.BLUE);
 
                     }
 
@@ -4334,56 +3162,53 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    /*
-    public void deleteAudioUploaded()
+    public void downloadAudioDialog()
     {
-        // Create a storage reference from our app
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://");
+        android.app.AlertDialog.Builder sendReportBox = new android.app.AlertDialog.Builder(MainActivity.this);
+        sendReportBox.setTitle("Download Memo");
+        sendReportBox.setMessage("Are you sure you want to download this memo?");
+        //sendReportBox.setIcon(android.R.drawable.ic_dialog_alert);
+        sendReportBox.setCancelable(true);
 
-        // Create a reference to the file to delete
-        StorageReference desertRef = storageRef.child("images/desert.jpg");
 
-        // Delete the file
-        desertRef.delete().addOnSuccessListener(new OnSuccessListener() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                // File deleted successfully
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Uh-oh, an error occurred!
-            }
-        });
+        sendReportBox.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        downloadAudio();
+                        dialog.cancel();
+                    }
+                });
+
+        sendReportBox.setNegativeButton(
+                "No",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        android.app.AlertDialog dialogReportBox = sendReportBox.create();
+        dialogReportBox.show();
+        dialogReportBox.getButton(dialogReportBox.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.forest_green));
+        dialogReportBox.getButton(dialogReportBox.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+
     }
-    */
 
 
     // TO DO. DOWNLOAD TO "PERSONAL"
     public void downloadAudio() {
         //Toast.makeText(MainActivity.this, "Download Button Touched", Toast.LENGTH_LONG).show();
 
-        // get tempString and add ".txt"
-        // go to the "MemosUploadedURL"
-        // look for tempString + ".txt"
-        // look through file for download URL
-        // set download URL to that URL
-        // create spinner that says "Downloading"
-        // once done, remove "tempString" from "audioArrayListUploaded"
-        // refresh the recyclerview.
+        String downloadAudioToThisFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalAudio";
+        String downloadTextToThisFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalText";
+        String downloadLocationsToThisFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalLocations";
 
-        File downloadAudioToThisFilePath = new File (Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalAudio");
-        File downloadTextToThisFilePath = new File (Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalText");
-        File downloadLocationsToThisFilePath = new File (Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "PersonalLocations");
 
-        // **LOCAL DOWNLOAD DIRECTORY FOR LOCATION FILE HERE.
 
-        //File localFileAudio = null;
-        //File localFileText = null;
-
-        File localFolderForAudio = null;
-        File localFolderForText = null;
-        //File localFolderForLocations = File.createTempFile(tempString, null, downloadLocationsToThisFilePath);
+        File localFolderForAudio = new File (downloadAudioToThisFilePath, tempString.toString());
+        File localFolderForText = new File (downloadTextToThisFilePath, tempString.toString() + ".txt");
+        File localFolderForLocations = new File (downloadLocationsToThisFilePath, tempString.toString() +".txt");
 
 
 
@@ -4396,37 +3221,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mProgress.show();
 
 
-        StorageReference filepathAudio = mStorage.child("UploadedAudio/"+ tempString); // online file path for the audio file.
+        StorageReference filepathAudio = mStorage.child("UploadedAudio/"+ tempString.toString()); // online file path for the audio file.
 
-        StorageReference filepathText = mStorage.child("UploadedText/" + tempString + ".txt"); // online path for the text file.
+        StorageReference filepathText = mStorage.child("UploadedText/" + tempString.toString() + ".txt"); // online path for the text file.
 
-        // **DIRECTORY FOR LOCATION FILE HERE
+        StorageReference filepathLocation = mStorage.child("UploadedLocations/" + tempString.toString() + ".txt"); // online path for the location file.
+
 
         String audioToDownloadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "MemosUploadedURL" + File.separator + tempString + ".txt";
 
-        //final Uri uriAudioDownload = Uri.fromFile(new File(audioToDownloadFilePath));
 
 
+        /*
         try {
-            localFolderForAudio = File.createTempFile(tempString, null, downloadAudioToThisFilePath);
-            localFolderForText = File.createTempFile(tempString, "txt", downloadTextToThisFilePath);
-            //File localFolderForLocations = File.createTempFile(tempString, null, downloadLocationsToThisFilePath);
+            localFolderForAudio = File.createTempFile(tempString.toString(), null, downloadAudioToThisFilePath);
+            localFolderForText = File.createTempFile(tempString.toString(), null, downloadTextToThisFilePath);
+            localFolderForLocations = File.createTempFile(tempString.toString(), null, downloadLocationsToThisFilePath);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+        */
 
 
         // download audio file to "PersonalAudio" folder.
         filepathAudio.getFile(localFolderForAudio).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(MainActivity.this, "Audio Download Complete", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Audio Download Complete", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                Toast.makeText(MainActivity.this, "Sorry. Something went wrong.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Unable to download audio.", Toast.LENGTH_SHORT).show();
+                mProgress.dismiss();
             }
         });
 
@@ -4435,77 +3263,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         filepathText.getFile(localFolderForText).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(MainActivity.this, "Transcript Download Complete", Toast.LENGTH_SHORT).show();
-                mProgress.dismiss();
+                //Toast.makeText(MainActivity.this, "Transcript Download Complete", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                Toast.makeText(MainActivity.this, "Sorry. Unable to download memo.", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Unable to download transcript.", Toast.LENGTH_LONG).show();
                 mProgress.dismiss();
             }
         });
 
 
-
-        /*
-        filepathAudio.child("UploadedAudio/" + tempString).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        // download location file to "PersonalLocations" folder.
+        filepathLocation.getFile(localFolderForLocations).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
             @Override
-            public void onSuccess(Uri uri) {
-                // Got the download URL for 'users/me/profile.png'
+            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(MainActivity.this, "Memo Downloaded", Toast.LENGTH_SHORT).show();
+                mProgress.dismiss();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
+                Toast.makeText(MainActivity.this, "Unable to download location file.", Toast.LENGTH_LONG).show();
+                mProgress.dismiss();
             }
         });
-        */
+
+
 
         mProgress.dismiss();
 
+        ((MyRecyclerViewAdapter) mAdapter).deleteItem(touchedPosition);
         refreshRecyclerView();
 
 
-        //**ADD DOWNLOAD DIRECTORY FOR LOCATION FILE HERE**
-
-        // go through text file with filenames
-        // find which line the filename was found on
-
-        // open file with URL of audio to "Personal". Download that file.
-        // open file with URL of text to "Personal". Download that file.
-
-        // Or use dialog box to allow user to select where they want file to be downloaded.
-
-        //StorageReference filepath = mStorage.child("UploadedAudio").child("new_audio.3gp");
-
-        /*
-        StorageReference filepathAudio = mStorage.child("UploadedAudio").child(tempString);
-
-        StorageReference filepathText = mStorage.child("UploadedText").child(tempString + ".txt");
-
-        //File localFile = File.createTempFile("audioFileDownloadTest", "3gp");
-        File localFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "therecording2.3gp");
 
 
-        */
     }
 
-
-    // ABILITY TO APPEND TO TEXT FILES USED TO FIND FILES, NOT OVERWRITE (DONE).
-
-    // ADD ABILITY TO CREATE MULTIPLE CATEGORIES (NOT JUST ONE, LIKE RIGHT NOW).
-    // ADD IN LOCATION STUFF (to do)
-    // ADD TRANSCRIPTION PREVIEW FOR MEMOS (to do)
-    // ADD ABILITY TO TOUCH BOXES TO EDIT TRANSCRIPTS FILES and MEMO TITLES (Transcripts done, memo names in progress)
-    // ADD ABILITY TO RECORD DIRECTLY TO THE CLOUD (to do)
-    // ** CHECK FOR DUPLICATES. IF USER TRIES TO NAME FILE WITH A NAME THAT ALREADY EXISTS, STOP THEM.**
 
 
     public void TextViewClicked(View v)
     {
-        //inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        //View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
 
         switcher.showNext();
 
@@ -4542,13 +3341,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     editTextString = editText.getText().toString();
 
-                    // **CONTINUE HERE**
 
-                    // **append to textfile at this point
-                    // ...and refresh contents of textbox
-                    // use a thread if not provided by either method.
-
-                    //switcher.showPrevious();
 
                     appendToTextFile();
 
@@ -4588,87 +3381,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-    /*
-    // when memo title is touched. Turn memo title into editable text.
-    public void memoTextViewClicked(View v)
-    {
-        //inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        //View vi = inflater.inflate(R.layout.recyclerview_item, null); //recyclerview_item.xml is your file.
 
-        switcher2.showNext();
-
-        onBackPressedCheck = 1;
-        Log.i("ONBACKPRESSED_CHECK", String.valueOf(onBackPressedCheck));
-
-        final TextView myTV = (TextView) switcher.findViewById(R.id.transcription_full);
-        final EditText editText = (EditText) findViewById(R.id.memoTitle_editText);
-
-        // focus on editText (for editing. Keyboard and cursor show)
-        editText.requestFocus();
-
-        // save the initial contents of the yellow box (transcription box) in case user cancels the edit.
-        previousTextStorage = String.valueOf(theTouchedRecording);
-
-        final InputMethodManager[] imm = {(InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)};
-        imm[0].showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
-
-        // make the initial contents of the editText the contents of the yellow box (transcription box)
-        editText.setText(String.valueOf(theTouchedRecording));
-
-
-        // key listener for ENTER and BACK buttons of user's keyboard
-        editText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-
-                // if the ENTER button is pressed while editing. Changes will be saved.
-                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN) &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER))
-                {
-                    // Perform action on key press
-
-
-                    editTextString = editText.getText().toString();
-
-                    // **CONTINUE HERE**
-
-                    // find file (use tempString)
-                    // rename file (audio and textfile)
-                    // swap arraylist position at i with new filename
-
-                    renameRecordingTouch();
-
-
-                    Toast.makeText(MainActivity.this, "Memo Title Saved", Toast.LENGTH_LONG).show();
-
-                    imm[0] = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm[0].hideSoftInputFromWindow(editText.getWindowToken(), 0);
-                    Log.i("ONBACKPRESSED_CHECK", String.valueOf(onBackPressedCheck));
-
-                    return true;
-                }
-
-                // if the BACK button is pressed while editing. Changes will be cancelled and the original text restored.
-                if ((keyCode == KeyEvent.KEYCODE_BACK))
-                {
-                    if (onBackPressedCheck == 1)
-                    {
-                        // set text to what it previously was. Reload same text file into the box.
-                        //textView.setText(previousTextStorage);
-                        switcher2.showPrevious();
-                        onBackPressedCheck = 0;
-                        Toast.makeText(MainActivity.this, "Edit Cancelled", Toast.LENGTH_SHORT).show();
-
-
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        });
-    }
-    */
 
 
 
@@ -4716,15 +3429,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // for when user is done editing the transcript (the one in the yellow box).
     public void appendToTextFile()
     {
-        Log.i("SEARCHING_FOR_FILE", tempString + ".txt");
+        Log.i("SEARCHING_FOR_FILE", tempString.toString() + ".txt");
 
-        String textFileToAppend = tempString + ".txt";
+        String textFileToAppend = tempString.toString() + ".txt";
 
-        // get name of file
-        // add txt at the end.
-        // search for file in appropriate directory
-        // open and overwrite
-        // close.
 
         String appendTextFilePath = null;
 
@@ -4788,29 +3496,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-        /*
-
-        // open the file
-        try {
-            FileOutputStream fou = openFileOutput(appendTextFilePath, Context.MODE_PRIVATE);
-
-            FileOutputStream outputStream = new FileOutputStream (new File(appendTextFilePath.toString(), false);
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fou);
-            outputStreamWriter.write(editTextString);
-            outputStreamWriter.close();
-
-
-            //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(MainActivity.this.openFileOutput(appendTextFilePath, Context.MODE_PRIVATE));
-            //outputStreamWriter.write(editTextString);
-            //outputStreamWriter.close();
-            Log.i("APPENDED_STRING", editTextString);
-
-        } catch (IOException e) {
-            Log.e("APPEND_TO_TEXTFILE", "File write failed: " + e.toString());
-        }
-        */
-
-
     }
 
 
@@ -4823,13 +3508,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     {
         switcher.showPrevious();
 
-        String textFileToAppend = tempString + ".txt";
+        String textFileToAppend = tempString.toString() + ".txt";
 
-        // get name of file
-        // add txt at the end.
-        // search for file in appropriate directory
-        // open and overwrite
-        // close.
 
         String appendTextFilePath = null;
 
@@ -4860,13 +3540,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             while ((line = br.readLine()) != null)
             {
                 text.append(line);
-                //text.append('\n');
             }
 
-            //TextView memoTitleRename = (TextView) view.findViewById(R.id.memo_title);
             TextView fullTranscription = (TextView) switcher.findViewById(R.id.transcription_full);
 
-            //memoTitleRename.setText(mp3ExtensionAdd);
             fullTranscription.setText(text);
 
         } catch (IOException e) {
@@ -4916,35 +3593,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-    // if user turns off location while using the app, prompt them to turn it back on and give them the option of going to the location settings
-    // by selecting yes.
-    public void showSettingsAlert()
-    {
-        android.app.AlertDialog.Builder alertDialog = new android.app.AlertDialog.Builder(
-                MainActivity.this);
-        alertDialog.setTitle("Location Services not enabled");
-        alertDialog.setMessage("Please enable Location Services. Go to Location Settings menu?");
-        alertDialog.setPositiveButton("Yes",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(
-                                Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        MainActivity.this.startActivity(intent);
-                    }
-                });
-        alertDialog.setNegativeButton("No",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-        alertDialog.show();
-    }
-
-
-
-
-
 
 
 
@@ -4959,10 +3607,225 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 default:
                     theLocationAddress = "Location Unavailable";
             }
-            //tvAddress.setText(locationAddress);
         }
     }
 
+
+
+
+    public void changeNavHeaderImage()
+    {
+        if (navCurrentSelected == 0) {
+            View hView = navigationView.getHeaderView(0);
+            hView.setBackgroundResource(R.drawable.nav_header_personal);
+            TextView nav_headerTextView_category = (TextView) hView.findViewById(R.id.nav_headerTextView);
+            //nav_headerTextView_category.setText("Personal");
+        }
+
+        else if (navCurrentSelected == 1) {
+            View hView = navigationView.getHeaderView(0);
+            hView.setBackgroundResource(R.drawable.nav_header_work);
+            TextView nav_headerTextView_category = (TextView) hView.findViewById(R.id.nav_headerTextView);
+            //nav_headerTextView_category.setText("Work");
+        }
+
+        else if (navCurrentSelected == 2) {
+            View hView = navigationView.getHeaderView(0);
+            hView.setBackgroundResource(R.drawable.nav_header_cloud);
+            TextView nav_headerTextView_category = (TextView) hView.findViewById(R.id.nav_headerTextView);
+            //nav_headerTextView_category.setText("Uploaded");
+        }
+
+        else
+        {
+            View hView = navigationView.getHeaderView(0);
+            hView.setBackgroundResource(R.drawable.nav_header_other);
+            TextView nav_headerTextView_category = (TextView) hView.findViewById(R.id.nav_headerTextView);
+            //nav_headerTextView_category.setText("Other");
+        }
+
+
+    }
+
+    public void deleteAudioFileUploadedDialog()
+    {
+        android.app.AlertDialog.Builder sendReportBox = new android.app.AlertDialog.Builder(MainActivity.this);
+        sendReportBox.setTitle("Delete Uploaded Memo");
+        sendReportBox.setMessage("Are you sure you want to delete this uploaded memo?");
+        sendReportBox.setIcon(android.R.drawable.ic_dialog_alert);
+        sendReportBox.setCancelable(true);
+
+
+        sendReportBox.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        deleteAudioFileUploaded();
+                        dialog.cancel();
+                    }
+                });
+
+        sendReportBox.setNegativeButton(
+                "No",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        android.app.AlertDialog dialogReportBox = sendReportBox.create();
+        dialogReportBox.show();
+        dialogReportBox.getButton(dialogReportBox.BUTTON_POSITIVE).setTextColor(Color.RED);
+        dialogReportBox.getButton(dialogReportBox.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+
+    }
+
+    public void deleteAudioFileUploaded()
+    {
+        mProgress = new ProgressDialog(MainActivity.this);
+        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgress.setCancelable(false);
+        mProgress.setTitle("Please Wait..");
+        mProgress.setMessage("Deleting...");
+
+        mProgress.show();
+
+
+        StorageReference filepathAudio = mStorage.child("UploadedAudio/"+ tempString.toString()); // online file path for the audio file.
+
+        StorageReference filepathText = mStorage.child("UploadedText/" + tempString.toString() + ".txt"); // online path for the text file.
+
+        StorageReference filepathLocation = mStorage.child("UploadedLocations/" + tempString.toString() + ".txt"); // online path for the location file.
+
+
+        String audioToDownloadFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "MemosUploadedURL" + File.separator + tempString + ".txt";
+
+
+
+
+
+        // delete audio file from the cloud
+        filepathAudio.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                //Toast.makeText(MainActivity.this, "Audio File Deleted", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Uh-oh, an error occurred!
+                Toast.makeText(MainActivity.this, "Unable to delete audio", Toast.LENGTH_SHORT).show();
+                mProgress.dismiss();
+            }
+        });
+
+
+
+
+
+
+        // delete transcript file from the cloud
+        filepathText.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                //Toast.makeText(MainActivity.this, "Transcription Deleted", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Uh-oh, an error occurred!
+                Toast.makeText(MainActivity.this, "Unable to delete transcript", Toast.LENGTH_SHORT).show();
+                mProgress.dismiss();
+            }
+        });
+
+
+
+
+
+
+        // delete location file from the cloud
+        filepathLocation.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                //Toast.makeText(MainActivity.this, "Location File Deleted", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Uh-oh, an error occurred!
+                Toast.makeText(MainActivity.this, "Unable to delete location file", Toast.LENGTH_SHORT).show();
+                mProgress.dismiss();
+            }
+        });
+
+
+
+        String deleteRecordingFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + "MemosUploaded";
+
+
+
+        String memosUploaded = Environment.getExternalStorageDirectory().getPath() + File.separator + "MemosUploaded";
+
+        String memosUploadedURL = Environment.getExternalStorageDirectory().getPath() + File.separator + "MemosUploadedURL";
+        String memoTranscriptsUploadedURL = Environment.getExternalStorageDirectory().getPath() + File.separator + "MemoTranscriptsUploadedURL";
+        String memoLocationsUploadedURL = Environment.getExternalStorageDirectory().getPath() + File.separator + "MemoLocationsUploadedURL";
+
+
+        File f1 = new File(memosUploaded);
+        File memoNameUploaded[] = f1.listFiles();
+
+        File f2 = new File(memosUploadedURL);
+        File memoAudioURL[] = f2.listFiles();
+
+        File f3 = new File(memoTranscriptsUploadedURL);
+        File memoTranscriptURL[] = f3.listFiles();
+
+        File f4 = new File(memoLocationsUploadedURL);
+        File memoLocationURL[] = f4.listFiles();
+
+
+        for (int i = 0; i < memoNameUploaded.length; i++) {
+            if (memoNameUploaded[i].getName().equals(tempString.toString() + ".txt")) {
+                boolean deleted = memoNameUploaded[i].delete();
+
+            }
+        }
+
+        for (int i = 0; i < memoAudioURL.length; i++) {
+            if (memoAudioURL[i].getName().equals(tempString.toString() + ".txt")) {
+                boolean deleted = memoAudioURL[i].delete();
+            }
+        }
+
+        for (int i = 0; i < memoTranscriptURL.length; i++) {
+            if (memoTranscriptURL[i].getName().equals(tempString.toString() + ".txt")) {
+                boolean deleted = memoTranscriptURL[i].delete();
+            }
+        }
+
+        for (int i = 0; i < memoLocationURL.length; i++) {
+            if (memoLocationURL[i].getName().equals(tempString.toString() + ".txt")) {
+                boolean deleted = memoLocationURL[i].delete();
+            }
+        }
+
+
+
+
+        mProgress.dismiss();
+
+        ((MyRecyclerViewAdapter) mAdapter).deleteItem(touchedPosition);
+        refreshRecyclerView();
+
+        // go to MemosUploaded, delete file named tempString.toString()
+        // go to MemosUploadedURL, delete file named tempString.toString() + ".txt"
+
+        // go to MemoTranscriptsUploadedURL, delete tempString.toString + ".txt"
+        // go to MemoLocationsUploadedURL, delete tempString.toString + ".txt"
+
+
+    }
 
 
 

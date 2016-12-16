@@ -26,7 +26,8 @@
                     android:orderInCategory="0"
                     android:id="@+id/nav_personal"
                     android:icon="@drawable/ic_device_icon_menu"
-                    android:title="Personal" />
+                    android:title="Personal"
+                    android:checked="true"/>
                 <item
                     android:orderInCategory="0"
                     android:id="@+id/nav_work"

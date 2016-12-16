@@ -114,10 +114,11 @@ public class MyRecyclerViewAdapter extends RecyclerView
         }
         */
 
-        if (MainActivity.navCurrentSelected == 0 || MainActivity.navCurrentSelected == 1)
+        if (MainActivity.navCurrentSelected == 0 || MainActivity.navCurrentSelected == 1 || MainActivity.navCurrentSelected == 4)
         {
             holder.dateTime.setText(previewTextToPass.toString());
         }
+
         else
         {
             holder.dateTime.setText("Expand for memo");
